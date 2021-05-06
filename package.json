@@ -9,7 +9,9 @@
   },
   "scripts": {
     "test": "hardhat test",
-    "build": "hardhat compile"
+    "build": "hardhat compile",
+    "lint:ts": "eslint \"./**/*{.ts,.tsx}\"",
+    "fix:ts": "eslint \"./**/*{.ts,.tsx}\" --fix"
   },
   "eslintConfig": {
     "extends": "./eslintrc.js"
