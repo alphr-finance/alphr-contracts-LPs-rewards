@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "private": true,
+  "directories": {
+    "test": "test"
+  },
   "scripts": {
     "test": "hardhat test",
     "build": "hardhat compile"
   },
   "devDependencies": {
+    "@commitlint/cli": "^12.0.1",
+    "@commitlint/config-conventional": "^12.0.1",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@types/chai": "^4.2.17",
@@ -17,9 +23,21 @@
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.1.4",
     "hardhat": "^2.2.1",
+    "hardhat-log-remover": "^2.0.1",
+    "hardhat-typechain": "^0.3.5",
+    "husky": "4",
+    "prettier": "^2.2.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.10",
     "solhint": "^3.3.4",
     "solhint-plugin-prettier": "^0.0.5",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
+  },
+    "husky": {
+    "hooks": {
+      "pre-commit": "",
+      "pre-push": "",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
   }
 }
