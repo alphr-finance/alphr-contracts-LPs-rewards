@@ -11,7 +11,12 @@
     "test": "hardhat test",
     "build": "hardhat compile",
     "lint:ts": "eslint \"./**/*{.ts,.tsx}\"",
-    "fix:ts": "eslint \"./**/*{.ts,.tsx}\" --fix"
+    "fix:ts": "eslint \"./**/*{.ts,.tsx}\" --fix",
+    "lint:sol": "solhint contracts/**/*.sol",
+    "lint:js": "eslint --ext .js .",
+    "fix:js": "eslint --ext .js --fix  .",
+    "fix:sol": "prettier --write 'contracts/**/*.sol'"
+
   },
   "eslintConfig": {
     "extends": "./eslintrc.js"
@@ -54,8 +59,8 @@
   },
     "husky": {
     "hooks": {
-      "pre-commit": "",
-      "pre-push": "",
+      "pre-commit": "yarn lint:sol && yarn lint:ts && yarn lint:js",
+      "pre-push": "yarn test",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   }

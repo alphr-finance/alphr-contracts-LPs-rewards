@@ -23,7 +23,10 @@ module.exports = {
         },
     },
     rules: {
-        'prettier/prettier': ['error', { singleQuote: true, endOfLine: 'auto' }],
+        'prettier/prettier': [
+            'error',
+            { singleQuote: true, endOfLine: 'auto' },
+        ],
         'import/extensions': [0],
         'prefer-destructuring': ['error', { object: true, array: false }],
         'no-negated-condition': 'error',

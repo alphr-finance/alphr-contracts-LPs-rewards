@@ -20,6 +20,9 @@ jobs:
             -   name: Build(to JS)
                 run: |
                     yarn build
+            -   name: Lint Solidity
+                run: |
+                    yarn lint:sol
             -   name: Test
                 run: |
                     yarn test
