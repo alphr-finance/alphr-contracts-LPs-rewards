@@ -9,7 +9,17 @@
   },
   "scripts": {
     "test": "hardhat test",
-    "build": "hardhat compile"
+    "build": "hardhat compile",
+    "lint:ts": "eslint \"./**/*{.ts,.tsx}\"",
+    "fix:ts": "eslint \"./**/*{.ts,.tsx}\" --fix",
+    "lint:sol": "solhint contracts/**/*.sol",
+    "lint:js": "eslint --ext .js .",
+    "fix:js": "eslint --ext .js --fix  .",
+    "fix:sol": "prettier --write 'contracts/**/*.sol'"
+
+  },
+  "eslintConfig": {
+    "extends": "./eslintrc.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",
@@ -32,13 +42,25 @@
     "solhint": "^3.3.4",
     "solhint-plugin-prettier": "^0.0.5",
     "ts-node": "^9.1.1",
-    "typechain": "^4.0.3",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.4",
+    "@types/jest": "^26.0.20",
+    "@typescript-eslint/eslint-plugin": "^4.13.0",
+    "@typescript-eslint/parser": "^4.13.0",
+    "commitlint": "^11.0.0",
+    "eslint": "7.2.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.1.3",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "lint-staged": ">=10",
+    "jest": "^26.6.3",
+    "typechain": "^4.0.3"
   },
     "husky": {
     "hooks": {
-      "pre-commit": "",
-      "pre-push": "",
+      "pre-commit": "yarn lint:sol && yarn lint:ts && yarn lint:js",
+      "pre-push": "yarn test",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   }
