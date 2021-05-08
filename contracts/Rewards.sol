@@ -26,7 +26,6 @@ contract Rewards is IRewards, Ownable {
         uint256 feeGrowthInside1LastX128,
         uint128 tokensOwed0,
         uint128 tokensOwed1) = INonfungiblePositionManager(nftManager).positions(_id);
-        
 
         return _liquidity;
     }
