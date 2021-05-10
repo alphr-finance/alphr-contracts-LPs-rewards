@@ -8,24 +8,26 @@ contract Rewards is IRewards, Ownable {
     // factory represents uniswapV3Factory
     address private factory;
 
-    // first address represents NFT token address
-    // second address represents NonfungiblePositionManager contract's address
-    // that corresponds to token
-    mapping (address => address) tokenStorage;
+    // nft manager
+    address private nftManager;
 
-    function stake(address _nftToken, uint256 _id) external override {
-        require(tokenStorage[_nftToken] != address(0), "No token");
+    constructor(address _factory, address _nftManager) public {
+        factory = _factory;
+        nftManager = _nftManager;
+    }
 
-        address positionManager = tokenStorage[_nftToken];
+    function stake(uint256 _id) external view override returns(uint128) {
         (uint96 nonce, 
         address operator,
         address token0,
         address token1, uint24 fee,int24 tickLower,int24 tickUpper,
-        uint128 liquidity,
+        uint128 _liquidity,
         uint256 feeGrowthInside0LastX128,
         uint256 feeGrowthInside1LastX128,
         uint128 tokensOwed0,
-        uint128 tokensOwed1) = INonfungiblePositionManager(positionManager).positions(_id);
+        uint128 tokensOwed1) = INonfungiblePositionManager(nftManager).positions(_id);
+
+        return _liquidity;
     }
 
     function unstake(address _nftToken) external override{}
@@ -41,11 +43,5 @@ contract Rewards is IRewards, Ownable {
 
     function getFactory() public view returns(address) {
         return factory;
-    }
-
-    function collectToken(address _nftToken, address _positionManager) external onlyOwner {
-        require(tokenStorage[_nftToken] == address(0), "Token already exists");
-        require(_positionManager != address(0), "Position manager is empty");
-        tokenStorage[_nftToken] = _positionManager;
     }
 }
