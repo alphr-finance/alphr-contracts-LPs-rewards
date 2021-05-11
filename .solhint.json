@@ -7,7 +7,6 @@
     "max-line-length": ["error", 120],
     "compiler-version": ["warn", "^0.7.0"],
     "prettier/prettier": "error",
-    "func-visibility": ["warn", {"ignoreConstructors": false}],
-    "ignoreConstructors": true
+    "func-visibility": ["warn", {"ignoreConstructors": false}]
   }
 }
