@@ -3,6 +3,7 @@ import "./interfaces/IRewards.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract Rewards is IRewards, Ownable {
     // factory represents uniswapV3Factory
@@ -11,12 +12,16 @@ contract Rewards is IRewards, Ownable {
     // nft manager
     address private nftManager;
 
-    constructor(address _factory, address _nftManager) public {
+    constructor(address _factory, address _nftManager) {
         factory = _factory;
         nftManager = _nftManager;
     }
 
-    function stake(uint256 _id) external view override returns(uint128) {
+    function stake(uint256 _id) external payable override returns(uint128) {
+        require(IERC721(nftManager).getApproved(_id) == address(this), "Token should be approved before stake");
+
+       IERC721(nftManager).transferFrom(msg.sender, address(this), _id);
+        emit NewStake(_id);
         (uint96 nonce, 
         address operator,
         address token0,
@@ -27,6 +32,11 @@ contract Rewards is IRewards, Ownable {
         uint128 tokensOwed0,
         uint128 tokensOwed1) = INonfungiblePositionManager(nftManager).positions(_id);
 
+        // TO DO
+        // 1) Store user as reward earner
+        // 2) Freeze already earned reward for user
+        // 3) recalculate reward for all users
+ 
         return _liquidity;
     }
 
