@@ -4,7 +4,7 @@
   "description": "",
   "private": true,
   "directories": {
-    "test": "test"
+    "test": "test/mainnet-tests"
   },
   "scripts": {
     "test": "hardhat test",

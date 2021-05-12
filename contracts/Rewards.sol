@@ -12,7 +12,7 @@ contract Rewards is IRewards, Ownable {
     // nft manager
     address private nftManager;
 
-    constructor(address _factory, address _nftManager) {
+    constructor(address _factory, address _nftManager) public {
         factory = _factory;
         nftManager = _nftManager;
     }
@@ -40,11 +40,17 @@ contract Rewards is IRewards, Ownable {
         return _liquidity;
     }
 
-    function unstake(address _nftToken) external override{}
+    function unstake(address _nftToken) external override {
+        revert("Not implemented");
+    }
 
-    function claim() external override{}
+    function claim() external override {
+        revert("Not implemented");
+    }
 
-    function getReward() external view override{}
+    function getReward() external view override {
+        revert("Not implemented");
+    }
 
     function setFactory(address _factory) external onlyOwner {
         require(_factory != address(0), "Empty address");
