@@ -26,7 +26,7 @@ contract Rewards is IRewards, Ownable {
       'Token should be approved before stake'
     );
 
-    IERC721(nftManager).transferFrom(msg.sender, address(this), _id);
+    INonfungiblePositionManager(nftManager).transferFrom(msg.sender, address(this), _id);
     userTokens[msg.sender].push(_id);
     emit NewStake(_id);
 
