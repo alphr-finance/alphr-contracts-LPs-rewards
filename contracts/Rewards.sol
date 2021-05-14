@@ -57,7 +57,41 @@ contract Rewards is IRewards, Ownable {
     return _liquidity;
   }
 
-  function unstake(address _nftToken) external override {}
+  function unstake(uint256 _id) external payable override {
+    require(userTokens[msg.sender].length > 0, 'User must have staked tokens');
+    uint256 index;
+    bool found = false;
+    // step 1 Find token
+    for (uint256 i = 0; i < userTokens[msg.sender].length; i++) {
+      if (userTokens[msg.sender][i] == _id) {
+        index = i;
+        found = true;
+        break;
+      }
+    }
+
+    require(found, 'User must owned this token');
+
+    // step 2 Remove token from array
+    for (uint256 i = 0; i < userTokens[msg.sender].length - 1; i++) {
+      if (i >= index) {
+        userTokens[msg.sender][i] = userTokens[msg.sender][i + 1];
+      }
+    }
+    // step 3 decrease array length
+    userTokens[msg.sender].pop();
+    // step 4 send token to user
+    INonfungiblePositionManager(nftManager).transferFrom(
+      address(this),
+      msg.sender,
+      _id
+    );
+
+    // step 5 emit event
+    emit NewUnstake(_id, msg.sender);
+
+    // TBD: step 6 claim user reward?
+  }
 
   function claim() external override {}
 
