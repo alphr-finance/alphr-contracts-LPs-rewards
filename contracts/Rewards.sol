@@ -50,7 +50,7 @@ contract Rewards is IRewards, Ownable {
     // 2) Freeze already earned reward for user
     // 3) recalculate reward for all users
 
-    return 0;
+    return _liquidity;
   }
 
   function unstake(address _nftToken) external override {}
