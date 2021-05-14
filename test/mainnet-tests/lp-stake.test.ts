@@ -2,7 +2,7 @@
 import { ethers, network } from 'hardhat';
 import { providers, utils } from 'ethers';
 import { ContractReceipt, ContractTransaction } from 'ethers';
-import { Rewards } from './../../typechain/Rewards';
+import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import {

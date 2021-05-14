@@ -26,5 +26,9 @@ const config: HardhatUserConfig = {
     mocha: {
         bail: true,
     },
+    typechain: {
+        target: 'ethers-v5',
+        outDir: 'typechain',
+    },
 };
 export default config;

@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Rewards is IRewards, Ownable {
     // factory represents uniswapV3Factory
@@ -17,26 +18,34 @@ contract Rewards is IRewards, Ownable {
         nftManager = _nftManager;
     }
 
-    function stake(uint256 _id) external payable override returns(uint128) {
-        require(IERC721(nftManager).getApproved(_id) == address(this), "Token should be approved before stake");
+    function stake(uint256 _id) external payable override returns (uint128) {
+        require(
+            IERC721(nftManager).getApproved(_id) == address(this),
+            "Token should be approved before stake"
+        );
 
-       IERC721(nftManager).transferFrom(msg.sender, address(this), _id);
+        IERC721(nftManager).transferFrom(msg.sender, address(this), _id);
         emit NewStake(_id);
-        (uint96 nonce, 
-        address operator,
-        address token0,
-        address token1, uint24 fee,int24 tickLower,int24 tickUpper,
-        uint128 _liquidity,
-        uint256 feeGrowthInside0LastX128,
-        uint256 feeGrowthInside1LastX128,
-        uint128 tokensOwed0,
-        uint128 tokensOwed1) = INonfungiblePositionManager(nftManager).positions(_id);
+        (
+            uint96 nonce,
+            address operator,
+            address token0,
+            address token1,
+            uint24 fee,
+            int24 tickLower,
+            int24 tickUpper,
+            uint128 _liquidity,
+            uint256 feeGrowthInside0LastX128,
+            uint256 feeGrowthInside1LastX128,
+            uint128 tokensOwed0,
+            uint128 tokensOwed1
+        ) = INonfungiblePositionManager(nftManager).positions(_id);
 
         // TO DO
         // 1) Store user as reward earner
         // 2) Freeze already earned reward for user
         // 3) recalculate reward for all users
- 
+
         return _liquidity;
     }
 
@@ -57,7 +66,7 @@ contract Rewards is IRewards, Ownable {
         factory = _factory;
     }
 
-    function getFactory() public view returns(address) {
+    function getFactory() public view returns (address) {
         return factory;
     }
 }
