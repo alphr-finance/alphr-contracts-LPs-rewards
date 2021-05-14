@@ -1,6 +1,6 @@
 // @ts-ignore
 import { ethers, network } from 'hardhat';
-import { providers } from 'ethers';
+import { providers, utils } from 'ethers';
 import { ContractReceipt, ContractTransaction } from 'ethers';
 import { Rewards } from './../../typechain/Rewards';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -11,11 +11,12 @@ import {
 } from '../../constants/uniswap';
 import { TX_RECEIPT_OK } from '../../constants/tx-receipt-status';
 import { IERC721Permit } from '../../typechain/IERC721Permit';
-// import { INonfungiblePositionManager } from '../../typechain/INonfungiblePositionManager';
-// import { ALPHR_TOKEN, WETH9 } from '../../constants/tokens';
-// import { FeeAmount, TICK_SPACINGS } from '../shared/constants';
-// import { getMinTick, getMaxTick } from '../shared/ticks';
-// import { encodePriceSqrt } from '../shared/encodePriceSqrt';
+import { INonfungiblePositionManager } from '../../typechain/INonfungiblePositionManager';
+import { ALPHR_TOKEN, WETH9 } from '../../constants/tokens';
+import { FeeAmount, MaxUint128, TICK_SPACINGS } from '../shared/constants';
+import { getMinTick, getMaxTick } from '../shared/ticks';
+import { encodePriceSqrt } from '../shared/encodePriceSqrt';
+import { IERC20 } from '../../typechain/IERC20';
 
 describe('Reward :: test reward contract', () => {
     let deployer, owner: SignerWithAddress;
@@ -39,6 +40,7 @@ describe('Reward :: test reward contract', () => {
     });
 
     it('contract status', async () => {
+        console.log(rew.address);
         expect(lpDeployTxr.status).eq(TX_RECEIPT_OK);
     });
 
@@ -65,30 +67,70 @@ describe('Reward :: test reward contract', () => {
     });
 
     // describe('Reward :: test stake within alphr token', async () => {
+    //     let nonFungibleManager: INonfungiblePositionManager
     //     before('mint nft token for pair alphr/WETH9', async () => {
-    //         const nonFungibleManager = await ethers.getContractAt('INonfungiblePositionManager', UNISWAP_V3_NFT_HANDLER) as INonfungiblePositionManager
+    //         nonFungibleManager = await ethers.getContractAt('INonfungiblePositionManager', UNISWAP_V3_NFT_HANDLER) as INonfungiblePositionManager
     //         await nonFungibleManager.createAndInitializePoolIfNecessary(
-    //             ALPHR_TOKEN,
     //             await nonFungibleManager.WETH9(),
+    //             ALPHR_TOKEN,
     //             FeeAmount.MEDIUM,
     //             encodePriceSqrt(1, 1)
     //         )
-    //         console.log(await (await nonFungibleManager.WETH9()).toString())
-    //         await nonFungibleManager.mint({
-    //             token0: ALPHR_TOKEN,
-    //             token1: await nonFungibleManager.WETH9(),
-    //             tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-    //             tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-    //             fee: FeeAmount.MEDIUM,
-    //             recipient: owner.address,
-    //             amount0Desired: 15,
-    //             amount1Desired: 15,
-    //             amount0Min: 0,
-    //             amount1Min: 0,
-    //             deadline: 10,
+    //         before('get ERC20 tokens', async () => {
+    //             await network.provider.send("hardhat_impersonateAccount", [ALPHR_TOKEN])
+    //             const alphrTokenHolder = await ethers.provider.getSigner(ALPHR_TOKEN)
+    //             const alphr = await ethers.getContractAt("IERC20", ALPHR_TOKEN) as IERC20
+    //             await alphr.approve(nonFungibleManager.address, MaxUint128)
+    //             await alphr.approve(owner.address, MaxUint128)
+    //             await owner.sendTransaction({from: owner.address, to: alphr.address, value: utils.parseEther('5')})
+    //             await alphr.connect(alphrTokenHolder).transfer(owner.address, utils.parseEther('5'))
+
+    //             await network.provider.send("hardhat_impersonateAccount", [WETH9])
+    //             const wethTokenHolder = await ethers.provider.getSigner(WETH9)
+    //             const weth = await ethers.getContractAt("IERC20", WETH9) as IERC20
+
+    //             await weth.approve(nonFungibleManager.address, MaxUint128)
+    //             await weth.approve(owner.address, MaxUint128)
+    //             await weth.sendTransaction({from: owner.address, to: alphr.address, value: utils.parseEther('5')})
+    //             await weth.connect(wethTokenHolder).transfer(owner.address, utils.parseEther('5'))
+
+    //             await alphr.approve(deployer.address, MaxUint128)
+    //             await weth.approve(deployer.address, MaxUint128)
     //         })
+
     //     })
     //     it('test stake method', async () => {
+    //      const mintData = nonFungibleManager.interface.encodeFunctionData('mint', [
+    //         {
+    //         token0: WETH9,
+    //         token1: ALPHR_TOKEN,
+    //         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+    //         tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+    //         fee: FeeAmount.MEDIUM,
+    //         recipient: deployer.address,
+    //         amount0Desired: 100,
+    //         amount1Desired: 100,
+    //         amount0Min: 0,
+    //         amount1Min: 0,
+    //         deadline: utils.parseEther('100'),
+    //         },
+    //      ])
+    //         console.log(mintData)
+    //         // console.log(owner.address)
+    //         // console.log(deployer.address)
+    //         // await nonFungibleManager.connect(owner).mint({
+    //         //     token0: WETH9,
+    //         //     token1: ALPHR_TOKEN,
+    //         //     tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+    //         //     tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+    //         //     fee: FeeAmount.MEDIUM,
+    //         //     recipient: deployer.address,
+    //         //     amount0Desired: 100,
+    //         //     amount1Desired: 100,
+    //         //     amount0Min: 0,
+    //         //     amount1Min: 0,
+    //         //     deadline: utils.parseEther('100'),
+    //         // })
     //     })
     // })
 });
