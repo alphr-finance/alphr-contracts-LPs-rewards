@@ -2,7 +2,6 @@
   "name": "lp-rewards",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "private": true,
   "directories": {
     "test": "test"
@@ -11,11 +10,12 @@
     "test": "hardhat test",
     "build": "hardhat compile",
     "lint:ts": "eslint \"./**/*{.ts,.tsx}\"",
-    "fix:ts": "eslint \"./**/*{.ts,.tsx}\" --fix",
-    "lint:sol": "solhint contracts/**/*.sol",
     "lint:js": "eslint --ext .js .",
+    "lint:sol": "solhint contracts/**/*.sol",
+    "fix:ts": "eslint \"./**/*{.ts,.tsx}\" --fix",
     "fix:js": "eslint --ext .js --fix  .",
-    "fix:sol": "prettier --write 'contracts/**/*.sol'"
+    "fix:sol": "prettier --write 'contracts/**/*.sol'",
+    "lint": "eslint \"./**/*{.ts,.tsx}\" && eslint --ext .js . && solhint contracts/**/*.sol"
   },
   "eslintConfig": {
     "extends": "./eslintrc.js"
@@ -60,7 +60,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint:sol && yarn lint:ts && yarn lint:js",
+      "pre-commit": "yarn lint",
       "pre-push": "yarn test",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
