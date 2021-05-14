@@ -1,9 +1,9 @@
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-typechain';
+import { MAINNET_URL_ALCHEMY } from './wallet';
 import { HardhatUserConfig } from 'hardhat/types';
 
-const MAINNET_URL_ALCHEMY = '';
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
