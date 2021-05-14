@@ -3,8 +3,11 @@ import { ethers, providers } from 'hardhat';
 import { expect } from 'chai';
 import { Rewards } from '../../typechain/Rewards';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+<<<<<<< HEAD
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
 import { UNISWAP_V3_FACTORY } from '../../constants/uniswaps';
+=======
+>>>>>>> e58e2c4 (feat: add tests)
 import {
   deployMockContract,
   MockContract,
@@ -24,6 +27,10 @@ describe('Lp get tokens test suite', () => {
   before('deploy lp contract', async () => {
     //TODO: delete after this values will be added into constants
     uniswapMock = await deployMockContract(uniswap, UNI.abi);
+<<<<<<< HEAD
+=======
+    const UNISWAP_V3_FACTORY = '0x1F98431c8aD98523631AE4a59f267346ea31F984';
+>>>>>>> e58e2c4 (feat: add tests)
     const Rewards = await ethers.getContractFactory('Rewards');
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
