@@ -62,18 +62,14 @@ describe('Lp get tokens test suite', () => {
 
   it('get user tokens', async () => {
     await rewards.connect(user).stake(777);
-    expect(await (await rewards.connect(user).getUserTokens()).toString()).eq(
+    expect((await rewards.connect(user).getUserTokens()).toString()).eq(
       '666,777'
     );
-    expect(await (await rewards.connect(user).getUserTokens()).length).eq(2);
+    expect((await rewards.connect(user).getUserTokens()).length).eq(2);
   });
 
   it('get user tokens while empty', async () => {
-    expect(
-      await (await rewards.connect(deployer).getUserTokens()).toString()
-    ).eq('');
-    expect(await (await rewards.connect(deployer).getUserTokens()).length).eq(
-      0
-    );
+    expect((await rewards.connect(deployer).getUserTokens()).toString()).eq('');
+    expect((await rewards.connect(deployer).getUserTokens()).length).eq(0);
   });
 });

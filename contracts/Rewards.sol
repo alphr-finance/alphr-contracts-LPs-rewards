@@ -20,13 +20,17 @@ contract Rewards is IRewards, Ownable {
     nftManager = _nftManager;
   }
 
-  function stake(uint256 _id) external payable override returns (uint128) {
+  function stake(uint256 _id) external override returns (uint128) {
     require(
       INonfungiblePositionManager(nftManager).getApproved(_id) == address(this),
       'Token should be approved before stake'
     );
 
-    INonfungiblePositionManager(nftManager).transferFrom(msg.sender, address(this), _id);
+    INonfungiblePositionManager(nftManager).transferFrom(
+      msg.sender,
+      address(this),
+      _id
+    );
     userTokens[msg.sender].push(_id);
     emit NewStake(_id);
 
