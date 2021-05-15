@@ -77,4 +77,12 @@ contract Rewards is IRewards, Ownable {
     tokens = userTokens[msg.sender];
     return tokens;
   }
+
+  function setNFTManager(address _nftManager) external onlyOwner {
+    nftManager = _nftManager;
+  }
+
+  function getNFTManager() external returns (address) {
+    nftManager;
+  }
 }
