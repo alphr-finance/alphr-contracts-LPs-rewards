@@ -1,11 +1,12 @@
 pragma solidity ^0.7.5;
 import './interfaces/IRewards.sol';
+import './interfaces/CalculatableUserShares.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
 import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 
-contract Rewards is IRewards, Ownable {
+contract Rewards is IRewards, CalculatableUserShares, Ownable {
   // factory represents uniswapV3Factory
   address private factory;
 
@@ -14,6 +15,17 @@ contract Rewards is IRewards, Ownable {
 
   // represents tokens that corresponds to particular user
   mapping(address => uint256[]) private userTokens;
+  
+    uint256 private totalAmountOfReward;
+
+  uint128 private totalAmountOftokens;
+  
+    struct userRewards {
+    // freezedAmount represents amount of tokens that will be saved after reaching the end of period
+    uint256 freezedAmount;
+    // userShares represents total shares in %. 100%=100ETH
+    uint256 userShares;
+  }
 
   constructor(address _factory, address _nftManager) {
     factory = _factory;
@@ -32,8 +44,8 @@ contract Rewards is IRewards, Ownable {
       _id
     );
     userTokens[msg.sender].push(_id);
+    totalAmountOftokens++;
     emit NewStake(_id);
-
     (
       uint96 nonce,
       address operator,
@@ -120,4 +132,6 @@ contract Rewards is IRewards, Ownable {
   function getNFTManager() external returns (address) {
     return nftManager;
   }
+
+    function recalculateUserShares() public override {}
 }
