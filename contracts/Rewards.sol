@@ -1,31 +1,29 @@
 pragma solidity ^0.7.5;
 import './interfaces/IRewards.sol';
-import './interfaces/CalculatableUserShares.sol';
+import './interfaces/Recalculatable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
 import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 
-contract Rewards is IRewards, CalculatableUserShares, Ownable {
+contract Rewards is IRewards, Recalculatable, Ownable {
   // factory represents uniswapV3Factory
   address private factory;
 
   // nft manager
   address private nftManager;
 
-  // represents tokens that corresponds to particular user
-  mapping(address => uint256[]) private userTokens;
-  
-    uint256 private totalAmountOfReward;
-
-  uint128 private totalAmountOftokens;
-  
-    struct userRewards {
+  struct userRewards {
     // freezedAmount represents amount of tokens that will be saved after reaching the end of period
     uint256 freezedAmount;
-    // userShares represents total shares in %. 100%=100ETH
-    uint256 userShares;
+    uint256 blockNumber;
   }
+  // represents tokens that corresponds to particular user; TO DO change on Iterable maps
+  mapping(address => uint256[]) private userTokens;
+  mapping(uint256 => address) private userAddresses;
+  mapping(address => userRewards) private rewardsPool;
+
+  uint256 private totalAmountOfReward;
 
   constructor(address _factory, address _nftManager) {
     factory = _factory;
@@ -43,8 +41,10 @@ contract Rewards is IRewards, CalculatableUserShares, Ownable {
       address(this),
       _id
     );
+
     userTokens[msg.sender].push(_id);
-    totalAmountOftokens++;
+    rewardsPool[msg.sender].blockNumber = block.number;
+
     emit NewStake(_id);
     (
       uint96 nonce,
@@ -133,5 +133,7 @@ contract Rewards is IRewards, CalculatableUserShares, Ownable {
     return nftManager;
   }
 
-    function recalculateUserShares() public override {}
+  function recalculateUserShares() public override {
+    revert('unimplemented');
+  }
 }
