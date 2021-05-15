@@ -12,4 +12,8 @@ interface IRewards {
   function claim() external;
 
   function getReward() external view;
+
+  function setTotalAmountOfRewardsPerEpoch(uint256 amount) external;
+
+  function getTotalAmountOfRewards() external view returns (uint256);
 }

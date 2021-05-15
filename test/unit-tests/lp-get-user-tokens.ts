@@ -6,6 +6,7 @@ import { Rewards } from '../../typechain/Rewards';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
 import { UNISWAP_V3_FACTORY } from '../../constants/uniswaps';
+import { ALPHR_TOKEN } from './../../constants/tokens';
 import {
   deployMockContract,
   MockContract,
@@ -28,7 +29,8 @@ describe('Lp get tokens test suite', () => {
     const Rewards = await ethers.getContractFactory('Rewards');
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
-      uniswapMock.address
+      uniswapMock.address,
+      ALPHR_TOKEN
     )) as Rewards;
     await rewards.deployed();
     rewDeployTx = await rewards.deployTransaction.wait();

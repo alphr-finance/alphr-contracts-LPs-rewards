@@ -5,6 +5,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
 import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 contract Rewards is IRewards, Recalculatable, Ownable {
   // factory represents uniswapV3Factory
@@ -13,6 +14,7 @@ contract Rewards is IRewards, Recalculatable, Ownable {
   // nft manager
   address private nftManager;
 
+  address private immutable alphrToken;
   struct userRewards {
     // freezedAmount represents amount of tokens that will be saved after reaching the end of period
     uint256 freezedAmount;
@@ -25,12 +27,14 @@ contract Rewards is IRewards, Recalculatable, Ownable {
 
   uint256 private totalAmountOfReward;
 
-  constructor(address _factory, address _nftManager) {
+  constructor(address _factory, address _nftManager, address _alphrToken) {
     factory = _factory;
     nftManager = _nftManager;
+    alphrToken = _alphrToken;
   }
 
   function stake(uint256 _id) external override returns (uint128) {
+    // to do rework: remove this section and add require to transferFrom
     require(
       INonfungiblePositionManager(nftManager).getApproved(_id) == address(this),
       'Token should be approved before stake'
@@ -135,5 +139,18 @@ contract Rewards is IRewards, Recalculatable, Ownable {
 
   function recalculateUserShares() public override {
     revert('unimplemented');
+  }
+
+  function setTotalAmountOfRewardsPerEpoch(uint256 _amount) external override onlyOwner {
+    require(_amount > 0, 'Total amount should be more then 0');
+    require(
+      IERC20(alphrToken).transferFrom(msg.sender, address(this), _amount),
+      'Low allowance'
+    );
+    totalAmountOfReward = _amount;
+  }
+
+  function getTotalAmountOfRewards() external view override returns (uint256) {
+    return totalAmountOfReward;
   }
 }
