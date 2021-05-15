@@ -7,7 +7,7 @@ interface IRewards {
 
   function stake(uint256 _id) external returns (uint128);
 
-  function unstake(uint256 _id) external payable;
+  function unstake(uint256 _id) external;
 
   function claim() external;
 

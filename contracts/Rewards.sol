@@ -57,7 +57,7 @@ contract Rewards is IRewards, Ownable {
     return _liquidity;
   }
 
-  function unstake(uint256 _id) external payable override {
+  function unstake(uint256 _id) external override {
     require(userTokens[msg.sender].length > 0, 'User must have staked tokens');
     uint256 index;
     bool found = false;
@@ -113,6 +113,7 @@ contract Rewards is IRewards, Ownable {
   }
 
   function setNFTManager(address _nftManager) external onlyOwner {
+    require(_nftManager != address(0), 'Empty address');
     nftManager = _nftManager;
   }
 
