@@ -1,3 +1,4 @@
+/* eslint-disable jest/valid-expect */
 //@ts-ignore
 import { ethers, providers } from 'hardhat';
 import { expect } from 'chai';
