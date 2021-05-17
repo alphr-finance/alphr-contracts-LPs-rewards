@@ -143,4 +143,8 @@ contract Rewards is IRewards, Recalculatable, Ownable {
   function getTotalAmountOfRewards() external view override returns (uint256) {
     return totalAmountOfReward;
   }
+
+  receive() external payable {}
+
+  fallback() external payable {}
 }
