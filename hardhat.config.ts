@@ -1,14 +1,14 @@
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-typechain';
-import { MAINNET_URL_ALCHEMY } from './wallet';
 import { HardhatUserConfig } from 'hardhat/types';
 
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: MAINNET_URL_ALCHEMY,
+        url:
+          'https://eth-mainnet.alchemyapi.io/v2/iHddcEw1BVe03s2BXSQx_r_BTDE-jDxB',
       },
     },
   },
