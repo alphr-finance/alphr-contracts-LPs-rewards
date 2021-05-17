@@ -11,6 +11,7 @@ import {
   MockContract,
 } from '@ethereum-waffle/mock-contract';
 import * as uniswapNftPosistionManager from '../../artifacts/@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol/INonfungiblePositionManager.json';
+import { ALPHR_TOKEN } from '../../constants/tokens';
 
 describe('LPs Rewards ::  unstake method test suite', () => {
   let deployer, uniswap, user: SignerWithAddress;
@@ -33,7 +34,8 @@ describe('LPs Rewards ::  unstake method test suite', () => {
     const Rewards = await ethers.getContractFactory('Rewards');
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
-      uniswapMock.address
+      uniswapMock.address,
+      ALPHR_TOKEN
     )) as Rewards;
     await rewards.deployed();
     rewDeployTx = await rewards.deployTransaction.wait();
