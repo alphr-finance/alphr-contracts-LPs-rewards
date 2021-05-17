@@ -2,7 +2,6 @@ import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
 import 'hardhat-typechain';
 import 'hardhat-gas-reporter';
-import { MAINNET_URL_ALCHEMY } from './wallet';
 import { HardhatUserConfig } from 'hardhat/types';
 
 const coinmarketcapAPIKey = '53cec9bc-a843-4e72-ab3b-8bf3df2fa87e';
