@@ -64,5 +64,8 @@
       "pre-push": "yarn test",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "dependencies": {
+    "hardhat-gas-reporter": "^1.0.4"
   }
 }
