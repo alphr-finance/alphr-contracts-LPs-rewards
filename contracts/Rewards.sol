@@ -122,7 +122,7 @@ contract Rewards is IRewards, Ownable {
     nftManager = _nftManager;
   }
 
-  function getNFTManager() external returns (address) {
+  function getNFTManager() external view returns (address) {
     return nftManager;
   }
 }
