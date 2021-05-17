@@ -5,7 +5,7 @@ interface IRewards {
   event NewStake(uint256 _tokenID);
   event NewUnstake(uint256 _tokenID, address to);
 
-  function stake(uint256 _id) external returns (uint128);
+  function stake(uint256 _id) external;
 
   function unstake(uint256 _id) external;
 
