@@ -86,8 +86,8 @@ describe('LPs Rewards ::  unstake method test suite', () => {
     expect(txr.events[0].event).eq(expectedEventName);
   });
 
-  it('getUserTokens returned length 0 and empty array after unstake', async () => {
-    let tokens = await rewards.connect(user).getUserTokens();
+  it('returns length 0 and empty array after unstake', async () => {
+    let tokens = await rewards.connect(user).staked();
     expect(tokens.length).eq(0);
     expect(tokens.toString()).eq('');
   });

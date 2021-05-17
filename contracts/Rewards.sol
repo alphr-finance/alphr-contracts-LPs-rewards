@@ -1,13 +1,13 @@
-pragma solidity ^0.7.5;
+pragma solidity =0.7.5;
 import './interfaces/IRewards.sol';
-import './interfaces/Recalculatable.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
+
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
 import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 
-contract Rewards is IRewards, Recalculatable, Ownable {
+contract Rewards is IRewards, Ownable {
   // factory represents uniswapV3Factory
   address private factory;
   // nft manager INonfungiblePositionManager
@@ -15,13 +15,11 @@ contract Rewards is IRewards, Recalculatable, Ownable {
   address private immutable alphrToken;
 
   struct Position {
-    uint256 nftPosition; // id of UNISWAP V3 nft token
+    uint256 nftPosition; //  UNISWAP V3 nft token ID
     uint256 blockNumber;
   }
   // represents tokens that corresponds to particular user; TO DO change on Iterable maps
   mapping(address => Position[]) private userPositions;
-
-  uint256 private totalAmountOfReward;
 
   constructor(
     address _factory,
@@ -34,7 +32,6 @@ contract Rewards is IRewards, Recalculatable, Ownable {
   }
 
   function stake(uint256 _id) external override {
-    // to do rework: remove this section and add require to transferFrom
     require(
       INonfungiblePositionManager(nftManager).getApproved(_id) == address(this),
       'Token should be approved before stake'
@@ -92,18 +89,11 @@ contract Rewards is IRewards, Recalculatable, Ownable {
 
   function claim() external override {}
 
-  function getReward() external view override {}
-
-  function setFactory(address _factory) external onlyOwner {
-    require(_factory != address(0), 'Empty address');
-    factory = _factory;
+  function getClaimableAmount() external view override {
+    revert('not implemented');
   }
 
-  function getFactory() public view returns (address) {
-    return factory;
-  }
-
-  function getUserTokens() external view returns (uint256[] memory) {
+  function staked() external view override returns (uint256[] memory) {
     Position[] memory positions =
       new Position[](userPositions[msg.sender].length);
     positions = userPositions[msg.sender];
@@ -114,6 +104,19 @@ contract Rewards is IRewards, Recalculatable, Ownable {
     return ids;
   }
 
+  function rollUp() external override onlyOwner {
+    revert('not implemented');
+  }
+
+  function setFactory(address _factory) external onlyOwner {
+    require(_factory != address(0), 'Empty address');
+    factory = _factory;
+  }
+
+  function getFactory() public view returns (address) {
+    return factory;
+  }
+
   function setNFTManager(address _nftManager) external onlyOwner {
     require(_nftManager != address(0), 'Empty address');
     nftManager = _nftManager;
@@ -121,26 +124,5 @@ contract Rewards is IRewards, Recalculatable, Ownable {
 
   function getNFTManager() external returns (address) {
     return nftManager;
-  }
-
-  function recalculateUserShares() public override {
-    revert('unimplemented');
-  }
-
-  function setTotalAmountOfRewardsPerEpoch(uint256 _amount)
-    external
-    override
-    onlyOwner
-  {
-    require(_amount > 0, 'Total amount should be more then 0');
-    require(
-      IERC20(alphrToken).transferFrom(msg.sender, address(this), _amount),
-      'Low allowance'
-    );
-    totalAmountOfReward = _amount;
-  }
-
-  function getTotalAmountOfRewards() external view override returns (uint256) {
-    return totalAmountOfReward;
   }
 }

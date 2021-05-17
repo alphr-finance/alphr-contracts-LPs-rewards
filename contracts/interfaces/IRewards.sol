@@ -11,9 +11,23 @@ interface IRewards {
 
   function claim() external;
 
-  function getReward() external view;
+  /**
+   * returns ids of user's staked nft positions
+   */
+  function staked() external view returns (uint256[] memory);
 
-  function setTotalAmountOfRewardsPerEpoch(uint256 amount) external;
+  /**
+   * returns available ALPHR reward amount to claim at request time
+   */
+  function getClaimableAmount() external view;
 
-  function getTotalAmountOfRewards() external view returns (uint256);
+  /**
+   * Calculates rewards for all staked positions and
+   * stores them in mapping
+   * @dev because pool's tick average price is available
+   * limited time, we need to save claimable amounts
+   * before oracle times limits reached
+   * @dev can be called only by owner
+   */
+  function rollUp() external;
 }
