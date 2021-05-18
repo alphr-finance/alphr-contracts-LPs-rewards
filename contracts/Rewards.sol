@@ -89,8 +89,8 @@ contract Rewards is IRewards, Ownable {
 
   function claim() external override {}
 
-  function getClaimableAmount() external view override {
-    revert('not implemented');
+  function getClaimableAmount() external view override returns (uint256) {
+    return 0;
   }
 
   function staked() external view override returns (uint256[] memory) {
