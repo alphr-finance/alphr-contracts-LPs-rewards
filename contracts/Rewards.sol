@@ -125,4 +125,8 @@ contract Rewards is IRewards, Ownable {
   function getNFTManager() external view returns (address) {
     return nftManager;
   }
+
+  receive() external payable {}
+
+  fallback() external payable {}
 }
