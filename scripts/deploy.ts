@@ -4,14 +4,19 @@ import {
   UNISWAP_V3_FACTORY,
   UNISWAP_V3_NFT_HANDLER,
 } from '../constants/uniswaps';
+import { ALPHR_TOKEN } from '../constants/tokens';
 
 async function main() {
   const rewards = await ethers
     .getContractFactory('Rewards')
     .then((deployFactory) =>
-      deployFactory.deploy(UNISWAP_V3_FACTORY, UNISWAP_V3_NFT_HANDLER)
+      deployFactory.deploy(
+        UNISWAP_V3_FACTORY,
+        UNISWAP_V3_NFT_HANDLER,
+        ALPHR_TOKEN
+      )
     );
-  console.log('FeeStorage contract deployed: %s', rewards.address);
+  console.log('Rewards contract deployed: %s', rewards.address);
 }
 
 main()
