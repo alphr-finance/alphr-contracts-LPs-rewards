@@ -2,40 +2,34 @@
 //@ts-ignore
 import { network, ethers, providers } from 'hardhat';
 import { expect } from 'chai';
-import { Rewards } from '../../typechain/Rewards';
+import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
 import { ALPHR_TOKEN } from '../../constants/tokens';
-import { UNISWAP_V3_FACTORY } from '../../constants/uniswaps';
-import { IERC20 } from '../../typechain/IERC20';
 import {
-  deployMockContract,
-  MockContract,
-} from '@ethereum-waffle/mock-contract';
+  UNISWAP_V3_FACTORY,
+  UNISWAP_V3_NFT_HANDLER,
+} from '../../constants/uniswaps';
+import { IERC20 } from '../../typechain/IERC20';
 import { utils } from 'ethers';
-
-const UNI = require('../../artifacts/@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol/INonfungiblePositionManager.json');
 
 const alphrDecimals = 18;
 const alphrHolderAddress = '0xd266d61ac22c2a2ac2dd832e79c14ea152c998d6';
 
 describe('Lp receive ALPHR test suite', () => {
-  let deployer, uniswap: SignerWithAddress;
+  let deployer: SignerWithAddress;
   let rewards: Rewards;
-  let uniswapMock: MockContract;
   let rewDeployTx: providers.TransactionReceipt;
 
   before('init signers', async () => {
-    [deployer, uniswap] = await ethers.getSigners();
+    [deployer] = await ethers.getSigners();
   });
 
-  before('deploy lp contract', async () => {
-    //TODO: delete after this values will be added into constants
-    uniswapMock = await deployMockContract(uniswap, UNI.abi);
+  before('deploy LPs rewards contract', async () => {
     const Rewards = await ethers.getContractFactory('Rewards');
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
-      uniswapMock.address,
+      UNISWAP_V3_NFT_HANDLER,
       ALPHR_TOKEN
     )) as Rewards;
     await rewards.deployed();
