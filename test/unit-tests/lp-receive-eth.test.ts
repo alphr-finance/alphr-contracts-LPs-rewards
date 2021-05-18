@@ -2,44 +2,38 @@
 //@ts-ignore
 import { network, ethers, providers } from 'hardhat';
 import { expect } from 'chai';
-import { Rewards } from '../../typechain/Rewards';
+import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
 import { ALPHR_TOKEN } from '../../constants/tokens';
-import { UNISWAP_V3_FACTORY } from '../../constants/uniswaps';
 import {
-  deployMockContract,
-  MockContract,
-} from '@ethereum-waffle/mock-contract';
+  UNISWAP_V3_FACTORY,
+  UNISWAP_V3_NFT_HANDLER,
+} from '../../constants/uniswaps';
 import { utils } from 'ethers';
 
-const UNI = require('../../artifacts/@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol/INonfungiblePositionManager.json');
-
 describe('Lp receive ETH test suite', () => {
-  let deployer, uniswap, user: SignerWithAddress;
+  let deployer, user: SignerWithAddress;
   let rewards: Rewards;
-  let uniswapMock: MockContract;
   let rewDeployTx: providers.TransactionReceipt;
 
   before('init signers', async () => {
-    [deployer, uniswap, user] = await ethers.getSigners();
+    [deployer, user] = await ethers.getSigners();
   });
 
-  before('deploy lp contract', async () => {
-    //TODO: delete after this values will be added into constants
-    uniswapMock = await deployMockContract(uniswap, UNI.abi);
+  before('deploy LPs rewards contract', async () => {
     const Rewards = await ethers.getContractFactory('Rewards');
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
-      uniswapMock.address,
+      UNISWAP_V3_NFT_HANDLER,
       ALPHR_TOKEN
     )) as Rewards;
     await rewards.deployed();
     rewDeployTx = await rewards.deployTransaction.wait();
   });
 
-  it('contract deployed sucessfully', async () => {
-    expect(rewDeployTx.status).eq(TX_RECEIPT_OK);
+  it('contract deployed successfully', async () => {
+    expect(rewDeployTx.status).to.be.eq(TX_RECEIPT_OK);
   });
 
   it('send 100 ETH to rewards contract and check balance', async () => {
@@ -47,9 +41,9 @@ describe('Lp receive ETH test suite', () => {
       to: rewards.address,
       value: utils.parseEther('100'),
     });
-    expect(await ethers.provider.getBalance(rewards.address)).eq(
-      utils.parseEther('100')
-    );
+    const actual = await ethers.provider.getBalance(rewards.address);
+    const expected = utils.parseEther('100');
+    expect(actual).to.be.eq(expected);
   });
 
   after('reset node fork', async () => {
