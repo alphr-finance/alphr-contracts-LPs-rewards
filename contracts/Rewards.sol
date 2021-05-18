@@ -1,4 +1,5 @@
 pragma solidity =0.7.5;
+pragma abicoder v2;
 import './interfaces/IRewards.sol';
 
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
@@ -101,6 +102,25 @@ contract Rewards is IRewards, Ownable {
 
   function getClaimableAmount() external view override returns (uint256) {
     return 0;
+  }
+
+  function getPositionClaimableAmount(uint256 nftPos)
+    external
+    view
+    returns (uint256)
+  {
+    Position memory pos;
+    Position[] memory positions =
+      new Position[](userPositions[msg.sender].length);
+    positions = userPositions[msg.sender];
+
+    for (uint256 i = 0; i < positions.length; i++) {
+      if (positions[i].nftPosition == nftPos) {
+        pos = positions[i];
+      }
+    }
+
+    return ((blockReward / 100) * 5) * (block.number - pos.blockNumber);
   }
 
   function staked() external view override returns (uint256[] memory) {
