@@ -67,14 +67,14 @@ describe('Lp get tokens test suite', () => {
     expect(txr.events[0].event).eq(expectedEventName);
   });
 
-  it('returns array of 2 elements [1,2] after getUserTokens', async () => {
+  it('returns array of 2 elements [1,2] from staked method', async () => {
     await rewards.connect(user).stake(2);
-    expect((await rewards.connect(user).getUserTokens()).toString()).eq('1,2');
-    expect((await rewards.connect(user).getUserTokens()).length).eq(2);
+    expect((await rewards.connect(user).staked()).toString()).eq('1,2');
+    expect((await rewards.connect(user).staked()).length).eq(2);
   });
 
   it('returns empty array for getTokens', async () => {
-    let tokens = await rewards.connect(deployer).getUserTokens();
+    let tokens = await rewards.connect(deployer).staked();
     expect(tokens.toString()).eq('');
     expect(tokens.length).eq(0);
   });
