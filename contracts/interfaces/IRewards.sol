@@ -19,7 +19,7 @@ interface IRewards {
   /**
    * returns available ALPHR reward amount to claim at request time
    */
-  function getClaimableAmount() external view;
+  function getClaimableAmount() external view returns (uint256);
 
   /**
    * Calculates rewards for all staked positions and
