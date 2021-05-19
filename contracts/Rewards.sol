@@ -14,6 +14,8 @@ contract Rewards is IRewards, Ownable {
   address private nftManager;
   address private immutable alphrToken;
 
+  uint256 private blockReward = 0;
+
   struct Position {
     uint256 nftPosition; //  UNISWAP V3 nft token ID
     uint256 blockNumber;
@@ -29,6 +31,14 @@ contract Rewards is IRewards, Ownable {
     factory = _factory;
     nftManager = _nftManager;
     alphrToken = _alphrToken;
+  }
+
+  function getBlockReward() external view returns (uint256) {
+    return blockReward;
+  }
+
+  function setBlockReward(uint256 _blockReward) external onlyOwner {
+    blockReward = _blockReward;
   }
 
   function stake(uint256 _id) external override {
