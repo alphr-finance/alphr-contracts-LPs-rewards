@@ -61,7 +61,7 @@ contract Rewards is IRewards, Ownable {
       _id
     );
 
-    userPositions[msg.sender].push(Position(_id, block.number, 0));
+    userPositions[msg.sender].push(Position(_id, block.number, uint256(0)));
 
     emit NewStake(_id);
   }
