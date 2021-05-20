@@ -1,21 +1,20 @@
 pragma solidity =0.7.5;
-pragma abicoder v2;
 
 import '@uniswap/v3-core/contracts/libraries/TickMath.sol';
 import '@uniswap/v3-core/contracts/libraries/SqrtPriceMath.sol';
 
-library PositionLib {
-  struct PositionData {
-    uint128 positionLiquidity;
-    int24 poolCurrentTick;
-    int24 positionTickLower;
-    int24 positionTickUpper;
-  }
+struct PositionData {
+  uint128 positionLiquidity;
+  int24 poolCurrentTick;
+  int24 positionTickLower;
+  int24 positionTickUpper;
+}
 
+library PositionLib {
   /**
    * @dev Get ALPHR amount for NFT
    */
-  function token0Amount(PositionData calldata pos)
+  function token0Amount(PositionData memory pos)
     internal
     pure
     returns (uint256 amount)
@@ -44,7 +43,7 @@ library PositionLib {
   /**
    * @dev Get ETH amount for NFT
    */
-  function token1Amount(PositionData calldata pos)
+  function token1Amount(PositionData memory pos)
     internal
     pure
     returns (uint256 amount)
