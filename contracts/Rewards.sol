@@ -61,7 +61,7 @@ contract Rewards is IRewards, Ownable {
       _id
     );
 
-    userPositions[msg.sender].push(Position(_id, block.number));
+    userPositions[msg.sender].push(Position(_id, block.number, 0));
 
     emit NewStake(_id);
   }
@@ -130,7 +130,7 @@ contract Rewards is IRewards, Ownable {
     return calculateClaimableAmount(pos.blockNumber);
   }
 
-  function calculateClaimableAmount(uint256 blockNumber) private pure returns (uint256){
+  function calculateClaimableAmount(uint256 blockNumber) private view returns (uint256){
     uint256 a = blockReward.div(100).mul(5);
     uint256 b = block.number.sub(blockNumber);
     uint256 res = a.mul(b);
