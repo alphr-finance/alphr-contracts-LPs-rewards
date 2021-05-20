@@ -186,7 +186,7 @@ contract Rewards is IRewards, Ownable {
 
     (, int24 poolTick, , , , , ) = IUniswapV3PoolState(msg.sender).slot0();
     (, , , , , int24 tickLower, int24 tickUpper, uint128 liquidity, , , , ) =
-      INonfungiblePositionManager(msg.sender).positions(pos.nftPosition);
+      INonfungiblePositionManager(nftManager).positions(pos.nftPosition);
     PositionData memory data =
       PositionData(liquidity, poolTick, tickLower, tickUpper);
     token0Amount = PositionLib.token0Amount(data);
