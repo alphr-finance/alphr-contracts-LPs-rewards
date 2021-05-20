@@ -1,5 +1,5 @@
-pragma solidity =0.7.5;
-pragma abicoder v2;
+pragma solidity =0.7.6;
+
 import './interfaces/IRewards.sol';
 
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
@@ -10,7 +10,7 @@ import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
-import {PositionLib, PositionData} from './libraries/Position.sol';
+import {PositionPower} from './libraries/PositionPower.sol';
 
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
@@ -175,7 +175,6 @@ contract Rewards is IRewards, Ownable {
     Position[] memory positions =
       new Position[](userPositions[msg.sender].length);
     positions = userPositions[msg.sender];
-
     for (uint256 i = 0; i < positions.length; i++) {
       if (positions[i].nftPosition == _id) {
         pos = positions[i];
@@ -187,12 +186,18 @@ contract Rewards is IRewards, Ownable {
     (, int24 poolTick, , , , , ) = IUniswapV3PoolState(msg.sender).slot0();
     (, , , , , int24 tickLower, int24 tickUpper, uint128 liquidity, , , , ) =
       INonfungiblePositionManager(nftManager).positions(pos.nftPosition);
-    PositionData memory data =
-      PositionData(liquidity, poolTick, tickLower, tickUpper);
-    token0Amount = PositionLib.token0Amount(data);
-    token1Amount = PositionLib.token1Amount(data);
-
-    return (token0Amount, token1Amount);
+    token0Amount = PositionPower.token0Amount(
+      liquidity,
+      poolTick,
+      tickLower,
+      tickUpper
+    );
+    token1Amount = PositionPower.token1Amount(
+      liquidity,
+      poolTick,
+      tickLower,
+      tickUpper
+    );
   }
 
   receive() external payable {}

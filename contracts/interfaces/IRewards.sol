@@ -1,4 +1,4 @@
-pragma solidity ^0.7.5;
+pragma solidity ^0.7.6;
 
 interface IRewards {
   event NewClaim(uint256 _amount, address _token, address _to);
