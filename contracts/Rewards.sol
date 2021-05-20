@@ -122,12 +122,10 @@ contract Rewards is IRewards, Ownable {
         pos = positions[i];
       }
     }
-    uint256 res = ((blockReward / 100) * 5) * (block.number - pos.blockNumber);
+    uint256 a = uint256(uint256(blockReward).div(100)).mul(5);
+    uint256 b = uint256(block.number).sub(pos.blockNumber);
+    uint256 res = uint256(a).mul(b);
 
-    require(
-      res / ((blockReward / 100) * 5) == (block.number - pos.blockNumber),
-      'SafeMath: multiplication overflow'
-    );
     return res;
   }
 
