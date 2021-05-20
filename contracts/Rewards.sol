@@ -1,4 +1,5 @@
 pragma solidity =0.7.5;
+pragma abicoder v2;
 import './interfaces/IRewards.sol';
 
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
@@ -6,8 +7,11 @@ import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.s
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 
 contract Rewards is IRewards, Ownable {
+  using SafeMath for uint256;
+
   // factory represents uniswapV3Factory
   address private factory;
   // nft manager INonfungiblePositionManager
@@ -101,6 +105,28 @@ contract Rewards is IRewards, Ownable {
 
   function getClaimableAmount() external view override returns (uint256) {
     return 0;
+  }
+
+  function getPositionClaimableAmount(uint256 nftPos)
+    external
+    view
+    returns (uint256)
+  {
+    Position memory pos;
+    Position[] memory positions =
+      new Position[](userPositions[msg.sender].length);
+    positions = userPositions[msg.sender];
+
+    for (uint256 i = 0; i < positions.length; i++) {
+      if (positions[i].nftPosition == nftPos) {
+        pos = positions[i];
+      }
+    }
+    uint256 a = blockReward.div(100).mul(5);
+    uint256 b = block.number.sub(pos.blockNumber);
+    uint256 res = a.mul(b);
+
+    return res;
   }
 
   function staked() external view override returns (uint256[] memory) {
