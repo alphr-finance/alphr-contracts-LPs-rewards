@@ -1,5 +1,4 @@
 pragma solidity =0.7.5;
-pragma abicoder v2;
 import './interfaces/IRewards.sol';
 
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
@@ -184,15 +183,38 @@ contract Rewards is IRewards, Ownable {
     }
     require(found, 'User position not found');
 
-    (, int24 poolTick, , , , , ) = IUniswapV3PoolState(msg.sender).slot0();
-    (, , , , , int24 tickLower, int24 tickUpper, uint128 liquidity, , , , ) =
-      INonfungiblePositionManager(nftManager).positions(pos.nftPosition);
+    int24 poolTick = bar(msg.sender);
+    (int24 tickLower, int24 tickUpper, uint128 liquidity) =
+      foo(pos.nftPosition);
+
     PositionData memory data =
       PositionData(liquidity, poolTick, tickLower, tickUpper);
+
     token0Amount = PositionLib.token0Amount(data);
     token1Amount = PositionLib.token1Amount(data);
 
     return (token0Amount, token1Amount);
+  }
+
+  function bar(address add) internal view returns (int24) {
+    (, int24 poolTick, , , , , ) = IUniswapV3PoolState(add).slot0();
+
+    return poolTick;
+  }
+
+  function foo(uint256 pos)
+    internal
+    view
+    returns (
+      int24,
+      int24,
+      uint128
+    )
+  {
+    (, , , , , int24 tickLower, int24 tickUpper, uint128 liquidity, , , , ) =
+      INonfungiblePositionManager(nftManager).positions(pos);
+
+    return (tickLower, tickUpper, liquidity);
   }
 
   receive() external payable {}
