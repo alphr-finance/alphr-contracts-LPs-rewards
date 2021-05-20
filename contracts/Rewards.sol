@@ -7,8 +7,11 @@ import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.s
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
+import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 
 contract Rewards is IRewards, Ownable {
+  using SafeMath for uint256;
+
   // factory represents uniswapV3Factory
   address private factory;
   // nft manager INonfungiblePositionManager
@@ -119,8 +122,13 @@ contract Rewards is IRewards, Ownable {
         pos = positions[i];
       }
     }
+    uint256 res = ((blockReward / 100) * 5) * (block.number - pos.blockNumber);
 
-    return ((blockReward / 100) * 5) * (block.number - pos.blockNumber);
+    require(
+      res / ((blockReward / 100) * 5) == (block.number - pos.blockNumber),
+      'SafeMath: multiplication overflow'
+    );
+    return res;
   }
 
   function staked() external view override returns (uint256[] memory) {
