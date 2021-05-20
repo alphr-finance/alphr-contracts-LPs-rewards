@@ -122,9 +122,9 @@ contract Rewards is IRewards, Ownable {
         pos = positions[i];
       }
     }
-    uint256 a = uint256(uint256(blockReward).div(100)).mul(5);
-    uint256 b = uint256(block.number).sub(pos.blockNumber);
-    uint256 res = uint256(a).mul(b);
+    uint256 a = blockReward.div(100).mul(5);
+    uint256 b = block.number.sub(pos.blockNumber);
+    uint256 res = a.mul(b);
 
     return res;
   }
