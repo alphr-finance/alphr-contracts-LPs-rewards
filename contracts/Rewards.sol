@@ -10,7 +10,7 @@ import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
-import {PositionLib} from './libraries/Position.sol';
+import {PositionLib, PositionData} from './libraries/Position.sol';
 
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
@@ -168,7 +168,7 @@ contract Rewards is IRewards, Ownable {
   function getTokensAmountsFromPosition(uint256 _id)
     external
     view
-    returns (uint256 token0, uint256 token1)
+    returns (uint256 token0Amount, uint256 token1Amount)
   {
     bool found = false;
     Position memory pos;
@@ -183,7 +183,16 @@ contract Rewards is IRewards, Ownable {
       }
     }
     require(found, 'User position not found');
-    // TODO positions() and slot0()
+
+    (, int24 poolTick, , , , , ) = IUniswapV3PoolState(msg.sender).slot0();
+    (, , , , , int24 tickLower, int24 tickUpper, uint128 liquidity, , , , ) =
+      INonfungiblePositionManager(msg.sender).positions(pos.nftPosition);
+    PositionData memory data =
+      PositionData(liquidity, poolTick, tickLower, tickUpper);
+    token0Amount = PositionLib.token0Amount(data);
+    token1Amount = PositionLib.token1Amount(data);
+
+    return (token0Amount, token1Amount);
   }
 
   receive() external payable {}
