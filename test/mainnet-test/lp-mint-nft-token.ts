@@ -155,8 +155,7 @@ describe('Reward :: test reward contract', () => {
 
   it('reward is stored user tokenId', async () => {
     let actualTokens = await rew.connect(user).staked();
-    let expectedTokens = [_id];
-    expect(actualTokens.length).to.be.eq(expectedTokens.length);
+    expect(actualTokens.length).to.be.eq(1);
     expect(actualTokens.toString()).to.be.eq(_id);
   });
 });
