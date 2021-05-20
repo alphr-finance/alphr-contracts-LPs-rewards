@@ -3,11 +3,14 @@ pragma abicoder v2;
 import './interfaces/IRewards.sol';
 
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
+import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
+import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol';
 import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
+import {PositionLib} from './libraries/Position.sol';
 
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
@@ -160,6 +163,27 @@ contract Rewards is IRewards, Ownable {
 
   function getNFTManager() external view returns (address) {
     return nftManager;
+  }
+
+  function getTokensAmountsFromPosition(uint256 _id)
+    external
+    view
+    returns (uint256 token0, uint256 token1)
+  {
+    bool found = false;
+    Position memory pos;
+    Position[] memory positions =
+      new Position[](userPositions[msg.sender].length);
+    positions = userPositions[msg.sender];
+
+    for (uint256 i = 0; i < positions.length; i++) {
+      if (positions[i].nftPosition == _id) {
+        pos = positions[i];
+        found = true;
+      }
+    }
+    require(found, 'User position not found');
+    // TODO positions() and slot0()
   }
 
   receive() external payable {}
