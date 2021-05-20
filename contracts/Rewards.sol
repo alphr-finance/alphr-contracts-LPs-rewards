@@ -26,6 +26,7 @@ contract Rewards is IRewards, Ownable {
   struct Position {
     uint256 nftPosition; //  UNISWAP V3 nft token ID
     uint256 blockNumber;
+    uint256 claimableReward;
   }
   // represents tokens that corresponds to particular user; TO DO change on Iterable maps
   mapping(address => Position[]) private userPositions;
@@ -125,8 +126,13 @@ contract Rewards is IRewards, Ownable {
         pos = positions[i];
       }
     }
+
+    return calculateClaimableAmount(pos.blockNumber);
+  }
+
+  function calculateClaimableAmount(uint256 blockNumber) private pure returns (uint256){
     uint256 a = blockReward.div(100).mul(5);
-    uint256 b = block.number.sub(pos.blockNumber);
+    uint256 b = block.number.sub(blockNumber);
     uint256 res = a.mul(b);
 
     return res;
@@ -144,7 +150,15 @@ contract Rewards is IRewards, Ownable {
   }
 
   function rollUp() external override onlyOwner {
-    revert('not implemented');
+    Position[] memory positions =
+      new Position[](userPositions[msg.sender].length);
+    positions = userPositions[msg.sender];
+
+    for (uint256 i = 0; i < positions.length; i++) {
+      uint256 oldBlock = userPositions[msg.sender][i].blockNumber;
+      userPositions[msg.sender][i].claimableReward = calculateClaimableAmount(oldBlock);
+      userPositions[msg.sender][i].blockNumber= block.number;
+    }
   }
 
   function setFactory(address _factory) external onlyOwner {
