@@ -1,10 +1,11 @@
+/* eslint-disable jest/valid-expect */
 //@ts-ignore
 import { ethers, network } from 'hardhat';
 import { utils } from 'ethers';
-//import { ContractTransaction } from 'ethers';
+import { ContractTransaction, ContractReceipt } from 'ethers';
 import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-//import { expect } from 'chai';
+import { expect } from 'chai';
 import {
   UNISWAP_V3_FACTORY,
   UNISWAP_V3_NFT_HANDLER,
@@ -12,17 +13,20 @@ import {
 
 import { INonfungiblePositionManager } from '../../typechain/INonfungiblePositionManager';
 import { ALPHR_TOKEN, WETH9 } from '../../constants/tokens';
-import { FeeAmount, MaxUint128 /*TICK_SPACINGS*/ } from '../shared/constants';
-//import { getMinTick, getMaxTick } from '../shared/ticks';
+import { FeeAmount, MaxUint128, TICK_SPACINGS } from '../shared/constants';
+import { getMinTick, getMaxTick } from '../shared/ticks';
 import { encodePriceSqrt } from '../shared/encodePriceSqrt';
 import { IERC20 } from '../../typechain/IERC20';
+import { BigNumber } from 'ethers';
 
 describe('Reward :: test reward contract', () => {
   let deployer, user: SignerWithAddress;
   let rew: Rewards;
-  //  let tx: ContractTransaction;
+  let tx: ContractTransaction;
+  let txr: ContractReceipt;
   let nonFungibleManager: INonfungiblePositionManager;
   let alphr, weth: IERC20;
+  let _id: BigNumber;
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
   });
@@ -42,11 +46,10 @@ describe('Reward :: test reward contract', () => {
       'INonfungiblePositionManager',
       UNISWAP_V3_NFT_HANDLER
     )) as INonfungiblePositionManager;
-    console.log((await nonFungibleManager.address).toString());
     await (
       await nonFungibleManager.createAndInitializePoolIfNecessary(
-        WETH9,
         ALPHR_TOKEN,
+        WETH9,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
       )
@@ -55,7 +58,7 @@ describe('Reward :: test reward contract', () => {
 
   before('get alphr token', async () => {
     alphr = (await ethers.getContractAt('IERC20', ALPHR_TOKEN)) as IERC20;
-    const alphrHolderAddress = '0xdffbf625624fe63478c147797892d6218f550c3d';
+    const alphrHolderAddress = '0x6d16749cefb3892a101631279a8fe7369a281d0e';
     await network.provider.send('hardhat_impersonateAccount', [
       alphrHolderAddress,
     ]);
@@ -67,15 +70,19 @@ describe('Reward :: test reward contract', () => {
         value: utils.parseEther('10'),
       })
     ).wait();
-    await alphr
-      .connect(alphrHolder)
-      .transfer(user.address, utils.parseEther('10'));
-    await alphr
-      .connect(alphrHolder)
-      .transfer(nonFungibleManager.address, utils.parseEther('10'));
-    await alphr.approve(nonFungibleManager.address, MaxUint128);
-    await alphr.connect(user).approve(nonFungibleManager.address, MaxUint128);
+
+    await (
+      await alphr
+        .connect(alphrHolder)
+        .transfer(user.address, utils.parseEther('10'))
+    ).wait();
+    await (
+      await alphr
+        .connect(user)
+        .approve(nonFungibleManager.address, utils.parseEther('1000'))
+    ).wait();
   });
+
   before('get weth token', async () => {
     weth = (await ethers.getContractAt('IERC20', WETH9)) as IERC20;
     const wethHolderAddress = '0xaae0633e15200bc9c50d45cd762477d268e126bd';
@@ -90,30 +97,66 @@ describe('Reward :: test reward contract', () => {
         value: utils.parseEther('10'),
       })
     ).wait();
-    await weth
-      .connect(wethHolder)
-      .transfer(user.address, utils.parseEther('10'));
-    await weth.approve(nonFungibleManager.address, MaxUint128);
-    await weth
-      .connect(wethHolder)
-      .transfer(nonFungibleManager.address, utils.parseEther('10'));
-    await weth.connect(user).approve(nonFungibleManager.address, MaxUint128);
+    await (
+      await weth
+        .connect(wethHolder)
+        .transfer(user.address, utils.parseEther('10'))
+    ).wait();
+
+    await (
+      await weth.connect(user).approve(nonFungibleManager.address, MaxUint128)
+    ).wait();
   });
 
-  // it('test mint method', async () => {
-  //   let n = 1621423479 + 100000
-  //   let txr = nonFungibleManager.mint({
-  //     token0: WETH9,
-  //     token1: ALPHR_TOKEN,
-  //     tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //     tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-  //     fee: FeeAmount.MEDIUM,
-  //     recipient: user.address,
-  //     amount0Desired: 15,
-  //     amount1Desired: 15,
-  //     amount0Min: 0,
-  //     amount1Min: 0,
-  //     deadline: n,
-  //   });
-  // });
+  before('mint token for user', async () => {
+    tx = await nonFungibleManager.connect(user).mint(
+      {
+        token0: ALPHR_TOKEN,
+        token1: WETH9,
+        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+        fee: FeeAmount.MEDIUM,
+        recipient: user.address,
+        amount0Desired: 100,
+        amount1Desired: 200,
+        amount0Min: 1,
+        amount1Min: 1,
+        deadline: utils.parseEther('1'),
+      },
+      { gasLimit: 12450000 }
+    );
+    txr = await tx.wait();
+    _id = txr.events[4].args.tokenId.toString();
+    console.log('mint after');
+  });
+
+  it('user now owned of token', async () => {
+    expect(await nonFungibleManager.ownerOf(_id)).to.be.eq(user.address);
+  });
+
+  it('revert stake when token is not approved', async () => {
+    await expect(rew.connect(user).stake(_id)).to.be.revertedWith(
+      'Token should be approved before stake'
+    );
+  });
+
+  it('emit stake event', async () => {
+    await nonFungibleManager.connect(user).approve(rew.address, _id);
+    let txLocal = await rew.connect(user).stake(_id);
+    let txrLocal = txLocal.wait();
+    const expectedEventName = rew.interface.events['NewStake(uint256)'].name;
+    const actualEventName = (await txrLocal).events[2].event;
+    expect(actualEventName).to.be.equal(expectedEventName);
+  });
+
+  it('rewards conatract is now owned the token id', async () => {
+    expect(await nonFungibleManager.ownerOf(_id)).to.be.eq(rew.address);
+  });
+
+  it('reward is stored user tokenId', async () => {
+    let actualTokens = await rew.connect(user).getUserTokens();
+    let expectedTokens = [_id];
+    expect(actualTokens.length).to.be.eq(expectedTokens.length);
+    expect(actualTokens.toString()).to.be.eq(_id);
+  });
 });
