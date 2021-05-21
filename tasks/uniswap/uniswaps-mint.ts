@@ -1,13 +1,3 @@
-// FOR TEST
-/*
-npx hardhat--network localhost  uni:init-pool 
-    --token0 0xaa99199d1e9644b588796f3215089878440d58e0 
-    --token1 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2 
-    --fee 3000 
-    --sqrtprice 1000 
-token0 -> ALPHR token
-token1 -> WETH9
-*/
 /* eslint-disable jest/no-standalone-expect */
 /* eslint-disable jest/valid-expect */
 import { task } from 'hardhat/config';
@@ -16,7 +6,7 @@ import { UNISWAP } from './uniswap-names';
 import { TICK_SPACINGS } from './../../test/shared/constants';
 import { getMinTick, getMaxTick } from './../../test/shared/ticks';
 
-export const CreatePolTask = task('uni:init-pool', 'create and init pool')
+export const MintTask = task('uni:mint', 'mint tokens')
   .addParam(UNISWAP.FROM, UNISWAP.FROM_DESC)
   .addParam(UNISWAP.TOKEN0_ADDRESS, UNISWAP.TOKEN0_ADDRESS_DESC)
   .addParam(UNISWAP.TOKEN1_ADDRESS, UNISWAP.TOKEN1_ADDRESS_DESC)
