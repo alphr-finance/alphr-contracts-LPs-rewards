@@ -1,4 +1,4 @@
-import * as UniswapTasks from './uniswap';
-import * as UniswapParams from './uniswap-names';
-import * as UniswapMint from './uniswaps-mint';
+import * as UniswapTasks from './create-and-init-pool';
+import * as UniswapParams from './create-and-init-pool.names';
+import * as UniswapMint from './mint-positions';
 export { UniswapTasks, UniswapParams, UniswapMint };
