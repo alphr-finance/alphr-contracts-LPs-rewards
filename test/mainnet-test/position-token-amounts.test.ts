@@ -1,6 +1,8 @@
 //@ts-ignore
+/* eslint-disable jest/valid-expect */
+
 import { ethers, network } from 'hardhat';
-import { Rewards, IUniswapV3Pool } from '../../typechain';
+import { Rewards } from '../../typechain';
 import {
   ALPHR_UNISWAP_V3_POOL,
   UNISWAP_V3_FACTORY,
@@ -10,14 +12,6 @@ import { expect } from 'chai';
 import { ALPHR_TOKEN } from '../../constants/tokens';
 
 describe('Position amounts :: test suite for ALPHR - WETH amount for positions', () => {
-  let pool: IUniswapV3Pool;
-  before('init alphr-weth pool', async () => {
-    pool = (await ethers.getContractAt(
-      'IUniswapV3Pool',
-      ALPHR_UNISWAP_V3_POOL
-    )) as IUniswapV3Pool;
-  });
-
   let rewards: Rewards;
   before('deploy LPs rewards farming contract', async () => {
     rewards = await ethers
