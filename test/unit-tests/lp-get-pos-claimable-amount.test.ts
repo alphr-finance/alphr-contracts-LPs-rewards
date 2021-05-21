@@ -5,7 +5,10 @@ import { expect } from 'chai';
 import { Rewards } from '../../typechain/Rewards';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
-import { UNISWAP_V3_FACTORY } from '../../constants/uniswaps';
+import {
+  ALPHR_UNISWAP_V3_POOL,
+  UNISWAP_V3_FACTORY,
+} from '../../constants/uniswaps';
 import { ALPHR_TOKEN } from './../../constants/tokens';
 import {
   deployMockContract,
@@ -14,7 +17,7 @@ import {
 
 const UNI = require('../../artifacts/@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol/INonfungiblePositionManager.json');
 
-describe('Lp get position claimbale amount test suite', () => {
+describe('LPs farming :: test suite get position claimable amount test suite { lp-get-pos-claimable-amount.test.ts }', () => {
   let deployer, uniswap, user: SignerWithAddress;
   let rewards: Rewards;
   let uniswapMock: MockContract;
@@ -30,7 +33,8 @@ describe('Lp get position claimbale amount test suite', () => {
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
       uniswapMock.address,
-      ALPHR_TOKEN
+      ALPHR_TOKEN,
+      ALPHR_UNISWAP_V3_POOL
     )) as Rewards;
     await rewards.deployed();
     rewDeployTx = await rewards.deployTransaction.wait();
@@ -86,7 +90,7 @@ describe('Lp get position claimbale amount test suite', () => {
           forking: {
             jsonRpcUrl:
               'https://eth-mainnet.alchemyapi.io/v2/iHddcEw1BVe03s2BXSQx_r_BTDE-jDxB',
-            blockNumber: 12419631,
+            blockNumber: 12472213,
           },
         },
       ],

@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
     "strict": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
-    "outDir": "dist"
   },
-  "include": ["tasks"],
+  "include": ["tasks", "test", "scripts"],
   "files": ["hardhat.config.ts"]
 }

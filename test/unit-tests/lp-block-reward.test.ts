@@ -1,17 +1,18 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
-import { ethers, providers } from 'hardhat';
+import { ethers, network, providers } from 'hardhat';
 import { expect } from 'chai';
 import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
 import { ALPHR_TOKEN } from '../../constants/tokens';
 import {
+  ALPHR_UNISWAP_V3_POOL,
   UNISWAP_V3_FACTORY,
-  UNISWAP_V3_NFT_HANDLER,
+  UNISWAP_V3_NFT_POSITION_MANAGER,
 } from '../../constants/uniswaps';
 
-describe('Lp block reward test suite', () => {
+describe('LPs farming :: block rewards test suite { lp-block-rewards.test.ts }', () => {
   let deployer, user: SignerWithAddress;
   let rewards: Rewards;
   let rewDeployTx: providers.TransactionReceipt;
@@ -24,8 +25,9 @@ describe('Lp block reward test suite', () => {
     const Rewards = await ethers.getContractFactory('Rewards');
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_HANDLER,
-      ALPHR_TOKEN
+      UNISWAP_V3_NFT_POSITION_MANAGER,
+      ALPHR_TOKEN,
+      ALPHR_UNISWAP_V3_POOL
     )) as Rewards;
     await rewards.deployed();
     rewDeployTx = await rewards.deployTransaction.wait();
@@ -48,5 +50,20 @@ describe('Lp block reward test suite', () => {
     await expect(rewards.connect(user).setBlockReward(10)).to.be.revertedWith(
       'revert Ownable: caller is not the owner'
     );
+  });
+
+  after('reset node fork', async () => {
+    await network.provider.request({
+      method: 'hardhat_reset',
+      params: [
+        {
+          forking: {
+            jsonRpcUrl:
+              'https://eth-mainnet.alchemyapi.io/v2/iHddcEw1BVe03s2BXSQx_r_BTDE-jDxB',
+            blockNumber: 12472213,
+          },
+        },
+      ],
+    });
   });
 });

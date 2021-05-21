@@ -7,16 +7,17 @@ import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import {
+  ALPHR_UNISWAP_V3_POOL,
   UNISWAP_V3_FACTORY,
-  UNISWAP_V3_NFT_HANDLER,
+  UNISWAP_V3_NFT_POSITION_MANAGER,
 } from '../../constants/uniswaps';
 
-import { INonfungiblePositionManager } from '../../typechain/INonfungiblePositionManager';
+import { INonfungiblePositionManager } from '../../typechain';
 import { ALPHR_TOKEN, WETH9 } from '../../constants/tokens';
 import { FeeAmount, MaxUint128, TICK_SPACINGS } from '../shared/constants';
 import { getMinTick, getMaxTick } from '../shared/ticks';
 import { encodePriceSqrt } from '../shared/encodePriceSqrt';
-import { IERC20 } from '../../typechain/IERC20';
+import { IERC20 } from '../../typechain';
 import { BigNumber } from 'ethers';
 
 describe('Reward :: test reward contract', () => {
@@ -35,8 +36,9 @@ describe('Reward :: test reward contract', () => {
     const Rewards = await ethers.getContractFactory('Rewards');
     rew = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_HANDLER,
-      ALPHR_TOKEN
+      UNISWAP_V3_NFT_POSITION_MANAGER,
+      ALPHR_TOKEN,
+      ALPHR_UNISWAP_V3_POOL
     )) as Rewards;
     await rew.deployed();
   });
@@ -44,7 +46,7 @@ describe('Reward :: test reward contract', () => {
   before('create nft manager', async () => {
     nonFungibleManager = (await ethers.getContractAt(
       'INonfungiblePositionManager',
-      UNISWAP_V3_NFT_HANDLER
+      UNISWAP_V3_NFT_POSITION_MANAGER
     )) as INonfungiblePositionManager;
     await (
       await nonFungibleManager.createAndInitializePoolIfNecessary(
@@ -157,5 +159,20 @@ describe('Reward :: test reward contract', () => {
     let actualTokens = await rew.connect(user).staked();
     expect(actualTokens.length).to.be.eq(1);
     expect(actualTokens.toString()).to.be.eq(_id);
+  });
+
+  after('reset node fork', async () => {
+    await network.provider.request({
+      method: 'hardhat_reset',
+      params: [
+        {
+          forking: {
+            jsonRpcUrl:
+              'https://eth-mainnet.alchemyapi.io/v2/iHddcEw1BVe03s2BXSQx_r_BTDE-jDxB',
+            blockNumber: 12472213,
+          },
+        },
+      ],
+    });
   });
 });

@@ -7,8 +7,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
 import { ALPHR_TOKEN } from '../../constants/tokens';
 import {
+  ALPHR_UNISWAP_V3_POOL,
   UNISWAP_V3_FACTORY,
-  UNISWAP_V3_NFT_HANDLER,
+  UNISWAP_V3_NFT_POSITION_MANAGER,
 } from '../../constants/uniswaps';
 import { utils } from 'ethers';
 
@@ -25,8 +26,9 @@ describe('Lp receive ETH test suite', () => {
     const Rewards = await ethers.getContractFactory('Rewards');
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_HANDLER,
-      ALPHR_TOKEN
+      UNISWAP_V3_NFT_POSITION_MANAGER,
+      ALPHR_TOKEN,
+      ALPHR_UNISWAP_V3_POOL
     )) as Rewards;
     await rewards.deployed();
     rewDeployTx = await rewards.deployTransaction.wait();
@@ -54,7 +56,7 @@ describe('Lp receive ETH test suite', () => {
           forking: {
             jsonRpcUrl:
               'https://eth-mainnet.alchemyapi.io/v2/iHddcEw1BVe03s2BXSQx_r_BTDE-jDxB',
-            blockNumber: 12419631,
+            blockNumber: 12472213,
           },
         },
       ],

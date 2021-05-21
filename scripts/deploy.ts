@@ -2,7 +2,7 @@
 import { ethers } from 'hardhat';
 import {
   UNISWAP_V3_FACTORY,
-  UNISWAP_V3_NFT_HANDLER,
+  UNISWAP_V3_NFT_POSITION_MANAGER,
 } from '../constants/uniswaps';
 import { ALPHR_TOKEN } from '../constants/tokens';
 
@@ -12,7 +12,7 @@ async function main() {
     .then((deployFactory) =>
       deployFactory.deploy(
         UNISWAP_V3_FACTORY,
-        UNISWAP_V3_NFT_HANDLER,
+        UNISWAP_V3_NFT_POSITION_MANAGER,
         ALPHR_TOKEN
       )
     );
