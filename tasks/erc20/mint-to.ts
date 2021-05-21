@@ -1,6 +1,5 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { task } from 'hardhat/config';
-//import { IERC20 } from '../../typechain';
 
 task('erc20mock:mintTo', 'erc20 mint token amount to recipient')
   .addParam('address', 'ERC20Mock contract address')
