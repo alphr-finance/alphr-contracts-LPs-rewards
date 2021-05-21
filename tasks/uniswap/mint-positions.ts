@@ -2,11 +2,16 @@
 /* eslint-disable jest/valid-expect */
 import { task } from 'hardhat/config';
 import { UNISWAP_V3_NFT_POSITION_MANAGER } from './../../constants/uniswaps';
+<<<<<<< HEAD
 import { UNISWAP_MINT } from './mint-position.names';
+=======
+import { UNISWAP } from './uniswap-names';
+>>>>>>> dcda585 (fix: fix rebase)
 import { TICK_SPACINGS } from './../../test/shared/constants';
 import { getMinTick, getMaxTick } from './../../test/shared/ticks';
 
 export const MintTask = task('uni:mint', 'mint tokens')
+<<<<<<< HEAD
   .addParam(UNISWAP_MINT.FROM, UNISWAP_MINT.FROM_DESC)
   .addParam(UNISWAP_MINT.TOKEN0_ADDRESS, UNISWAP_MINT.TOKEN0_ADDRESS_DESC)
   .addParam(UNISWAP_MINT.TOKEN1_ADDRESS, UNISWAP_MINT.TOKEN1_ADDRESS_DESC)
@@ -19,6 +24,20 @@ export const MintTask = task('uni:mint', 'mint tokens')
   .addParam(UNISWAP_MINT.AMOUNT0_MIN, UNISWAP_MINT.AMOUNT0_MIN_DESC)
   .addParam(UNISWAP_MINT.AMOUNT1_MIN, UNISWAP_MINT.AMOUNT1_MIN_DESC)
   .addParam(UNISWAP_MINT.DEADLINE, UNISWAP_MINT.DEADLINE_DESC)
+=======
+  .addParam(UNISWAP.FROM, UNISWAP.FROM_DESC)
+  .addParam(UNISWAP.TOKEN0_ADDRESS, UNISWAP.TOKEN0_ADDRESS_DESC)
+  .addParam(UNISWAP.TOKEN1_ADDRESS, UNISWAP.TOKEN1_ADDRESS_DESC)
+  .addParam(UNISWAP.TICK_LOWER, UNISWAP.TICK_LOWER_DESC)
+  .addParam(UNISWAP.TICK_UPPER, UNISWAP.TICK_UPPER_DESC)
+  .addParam(UNISWAP.FEE_AMOUNT, UNISWAP.FEE_AMOUNT_DESC)
+  .addParam(UNISWAP.RECIPIENT, UNISWAP.RECIPIENT_DESC)
+  .addParam(UNISWAP.AMOUNT0_DESIRED, UNISWAP.AMOUNT0_DESIRED_DESC)
+  .addParam(UNISWAP.AMOUNT1_DESIRED, UNISWAP.AMOUNT1_DESIRED_DESC)
+  .addParam(UNISWAP.AMOUNT0_MIN, UNISWAP.AMOUNT0_MIN_DESC)
+  .addParam(UNISWAP.AMOUNT1_MIN, UNISWAP.AMOUNT1_MIN_DESC)
+  .addParam(UNISWAP.DEADLINE, UNISWAP.DEADLINE_DESC)
+>>>>>>> dcda585 (fix: fix rebase)
   .setAction(
     async (
       {
