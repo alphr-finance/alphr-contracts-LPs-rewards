@@ -1,3 +1,4 @@
 import * as UniswapTasks from './uniswap/index';
 import * as RewardsTasks from './rewards/index';
-export { UniswapTasks, RewardsTasks };
+import * as LPsBootstrap from './lps-bootstrap';
+export { UniswapTasks, RewardsTasks, LPsBootstrap };

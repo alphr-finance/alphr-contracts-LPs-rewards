@@ -1,7 +1,7 @@
 // env for manual trade task names
 export const LP_TEST_BOOTSTRAP = {
   // task name and desc
-  NAME: 'lp:test:bootstrap',
+  NAME: 'lps-rewards:test:bootstrap',
   DESC: 'Bootstrap test environment for rewards:',
 
   // task params

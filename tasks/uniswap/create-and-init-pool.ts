@@ -13,11 +13,11 @@ token1 -> WETH9
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { task } from 'hardhat/config';
-import { UNISWAP_V3_NFT_HANDLER } from './../../constants/uniswaps';
-import { TX_RECEIPT_OK } from './../../constants/tx-status';
-import { UNISWAP } from './uniswap-names';
+import { UNISWAP_V3_NFT_POSITION_MANAGER } from '../../constants/uniswaps';
+import { TX_RECEIPT_OK } from '../../constants/tx-status';
+import { UNISWAP } from './create-and-init-pool.names';
 
-export const CreatePolTasl = task('uni:init-pool', 'create and init pool')
+export default task('uni:init-pool', 'create and init pool')
   .addParam(UNISWAP.TOKEN0_ADDRESS, UNISWAP.TOKEN0_ADDRESS_DESC)
   .addParam(UNISWAP.TOKEN1_ADDRESS, UNISWAP.TOKEN1_ADDRESS_DESC)
   .addParam(UNISWAP.FEE_AMOUNT, UNISWAP.FEE_AMOUNT_DESC)
@@ -25,7 +25,7 @@ export const CreatePolTasl = task('uni:init-pool', 'create and init pool')
   .setAction(async ({ token0, token1, fee, sqrtprice }, hre) => {
     const nftManager = await hre.ethers.getContractAt(
       'INonfungiblePositionManager',
-      UNISWAP_V3_NFT_HANDLER
+      UNISWAP_V3_NFT_POSITION_MANAGER
     );
     let tx = await nftManager.createAndInitializePoolIfNecessary(
       token0,

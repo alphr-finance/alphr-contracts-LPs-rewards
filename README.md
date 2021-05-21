@@ -33,3 +33,4 @@ note: if using multiple contracts deployment (MMT, AMT, LPsR --, node has to be 
 ### deploy contracts
 
 > yarn hardhat run scripts/deploy.ts --network localhost
+
