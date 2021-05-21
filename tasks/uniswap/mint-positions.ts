@@ -2,7 +2,7 @@
 /* eslint-disable jest/valid-expect */
 import { task } from 'hardhat/config';
 import { UNISWAP_V3_NFT_POSITION_MANAGER } from './../../constants/uniswaps';
-import { UNISWAP_MINT } from './mint-position.names'
+import { UNISWAP_MINT } from './mint-position.names';
 import { TICK_SPACINGS } from './../../test/shared/constants';
 import { getMinTick, getMaxTick } from './../../test/shared/ticks';
 
