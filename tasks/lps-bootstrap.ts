@@ -15,7 +15,7 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
       fc: UNISWAP_V3_FACTORY,
       nft: UNISWAP_V3_NFT_POSITION_MANAGER,
       alphr: ALPHR_TOKEN,
-      ALPHR_UNISWAP_V3_POOL,
+      pool: ALPHR_UNISWAP_V3_POOL,
     });
   }
 );
