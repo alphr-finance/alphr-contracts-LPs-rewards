@@ -1,11 +1,14 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
-import { ethers, providers } from 'hardhat';
+import { ethers, network, providers } from 'hardhat';
 import { expect } from 'chai';
 import { Rewards } from '../../typechain/Rewards';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
-import { UNISWAP_V3_FACTORY } from '../../constants/uniswaps';
+import {
+  ALPHR_UNISWAP_V3_POOL,
+  UNISWAP_V3_FACTORY,
+} from '../../constants/uniswaps';
 import { ALPHR_TOKEN } from './../../constants/tokens';
 import {
   deployMockContract,
@@ -14,7 +17,7 @@ import {
 
 const UNI = require('../../artifacts/@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol/INonfungiblePositionManager.json');
 
-describe('Lp get tokens test suite', () => {
+describe('LPs farming :: get user staked positions test suite { lp-get-user-tokes.test.ts }', () => {
   let deployer, uniswap, user: SignerWithAddress;
   let rewards: Rewards;
   let uniswapMock: MockContract;
@@ -30,7 +33,8 @@ describe('Lp get tokens test suite', () => {
     rewards = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
       uniswapMock.address,
-      ALPHR_TOKEN
+      ALPHR_TOKEN,
+      ALPHR_UNISWAP_V3_POOL
     )) as Rewards;
     await rewards.deployed();
     rewDeployTx = await rewards.deployTransaction.wait();
@@ -77,5 +81,20 @@ describe('Lp get tokens test suite', () => {
     let tokens = await rewards.connect(deployer).staked();
     expect(tokens.toString()).eq('');
     expect(tokens.length).eq(0);
+  });
+
+  after('reset node fork', async () => {
+    await network.provider.request({
+      method: 'hardhat_reset',
+      params: [
+        {
+          forking: {
+            jsonRpcUrl:
+              'https://eth-mainnet.alchemyapi.io/v2/iHddcEw1BVe03s2BXSQx_r_BTDE-jDxB',
+            blockNumber: 12472213,
+          },
+        },
+      ],
+    });
   });
 });

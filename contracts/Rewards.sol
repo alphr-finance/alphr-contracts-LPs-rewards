@@ -6,8 +6,16 @@ import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
 import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
 import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol';
 import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
-import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
+import {
+  INonfungibleTokenPositionDescriptor
+} from '@uniswap/v3-periphery/contracts/interfaces/INonfungibleTokenPositionDescriptor.sol';
+import {
+  IERC721Enumerable
+} from '@openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {
+  IUniswapV3Pool
+} from '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {PositionPower} from './libraries/PositionPower.sol';
@@ -20,6 +28,7 @@ contract Rewards is IRewards, Ownable {
   // nft manager INonfungiblePositionManager
   address private nftManager;
   address private immutable alphrToken;
+  address private immutable alphrPool;
 
   uint256 private blockReward = 0;
 
@@ -33,11 +42,13 @@ contract Rewards is IRewards, Ownable {
   constructor(
     address _factory,
     address _nftManager,
-    address _alphrToken
+    address _alphrToken,
+    address _alphrPool
   ) {
     factory = _factory;
     nftManager = _nftManager;
     alphrToken = _alphrToken;
+    alphrPool = _alphrPool;
   }
 
   function getBlockReward() external view returns (uint256) {
@@ -170,22 +181,22 @@ contract Rewards is IRewards, Ownable {
     view
     returns (uint256 token0Amount, uint256 token1Amount)
   {
-    bool found = false;
-    Position memory pos;
-    Position[] memory positions =
-      new Position[](userPositions[msg.sender].length);
-    positions = userPositions[msg.sender];
-    for (uint256 i = 0; i < positions.length; i++) {
-      if (positions[i].nftPosition == _id) {
-        pos = positions[i];
-        found = true;
-      }
-    }
-    require(found, 'User position not found');
+    //    bool found = false;
+    //    Position memory pos;
+    //    Position[] memory positions =
+    //      new Position[](userPositions[msg.sender].length);
+    //    positions = userPositions[msg.sender];
+    //    for (uint256 i = 0; i < positions.length; i++) {
+    //      if (positions[i].nftPosition == _id) {
+    //        pos = positions[i];
+    //        found = true;
+    //      }
+    //    }
+    //    require(found, 'User position not found');
 
-    (, int24 poolTick, , , , , ) = IUniswapV3PoolState(msg.sender).slot0();
+    (, int24 poolTick, , , , , ) = IUniswapV3PoolState(alphrPool).slot0();
     (, , , , , int24 tickLower, int24 tickUpper, uint128 liquidity, , , , ) =
-      INonfungiblePositionManager(nftManager).positions(pos.nftPosition);
+      INonfungiblePositionManager(nftManager).positions(_id);
     token0Amount = PositionPower.token0Amount(
       liquidity,
       poolTick,
