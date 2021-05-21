@@ -12,6 +12,8 @@ import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {PositionPower} from './libraries/PositionPower.sol';
 
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
 
@@ -150,13 +152,9 @@ contract Rewards is IRewards, Ownable {
   }
 
   function rollUp() external override onlyOwner {
-    Position[] memory positions =
-      new Position[](userPositions[msg.sender].length);
-    positions = userPositions[msg.sender];
-
-    for (uint256 i = 0; i < positions.length; i++) {
+    for (uint256 i = 0; i < userPositions[msg.sender].length; i++) {
       uint256 oldBlock = userPositions[msg.sender][i].blockNumber;
-      userPositions[msg.sender][i].claimableReward = calculateClaimableAmount(oldBlock);
+      userPositions[msg.sender][i].claimableReward += calculateClaimableAmount(oldBlock);
       userPositions[msg.sender][i].blockNumber= block.number;
     }
   }
