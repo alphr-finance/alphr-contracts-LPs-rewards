@@ -1,3 +1,3 @@
-import * as RewardsDeploy from './lp-deploy';
-import * as RewardsTestDeploy from './lp-bootstrap-test';
-export default { RewardsDeploy, RewardsTestDeploy };
+import * as RewardsDeploy from './lp-rewards-deploy';
+
+export default { RewardsDeploy };

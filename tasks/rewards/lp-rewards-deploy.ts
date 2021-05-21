@@ -1,5 +1,5 @@
 import { task } from 'hardhat/config';
-import { LP_DEPLOY } from './lp-deploy-names';
+import { LP_DEPLOY } from './lp-rewards-deploy.names';
 
 export default task(LP_DEPLOY.NAME, LP_DEPLOY.DESC)
   .addParam(LP_DEPLOY.FACTORY_ADDRESS, LP_DEPLOY.FACTORY_ADDRESS_DESC)

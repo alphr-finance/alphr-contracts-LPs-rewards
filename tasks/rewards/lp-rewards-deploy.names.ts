@@ -1,7 +1,7 @@
 // Rewards deploy task names
 export const LP_DEPLOY = {
   // task name and desc
-  NAME: 'rewards:deploy',
+  NAME: 'lps-rewards:deploy',
   DESC: 'Deploy Rewards contract',
 
   // task params

@@ -1,5 +1,9 @@
 // Rewards deploy task names
 export const UNISWAP = {
+  // task name and desc
+  NAME: 'uni:create-and-init-pool',
+  DESC: 'Create and init Uniswap v3 pool via nft position manager',
+
   // task params
   TOKEN0_ADDRESS: 'token0',
   TOKEN0_ADDRESS_DESC: 'Token0 Address',
