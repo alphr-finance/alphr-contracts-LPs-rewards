@@ -2,13 +2,12 @@
 //@ts-ignore
 import { ethers, network, providers } from 'hardhat';
 import { expect } from 'chai';
-import { ERC20Mock } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TX_RECEIPT_OK } from '../../constants/tx-status';
 
 describe('ERC20Mock :: mint test suite { mint.test.ts }', () => {
   let deployer, recipient1, recipient2: SignerWithAddress;
-  let token: ERC20Mock;
+  let token;
   let tokenDeployTx: providers.TransactionReceipt;
 
   before('init signers', async () => {
@@ -17,9 +16,7 @@ describe('ERC20Mock :: mint test suite { mint.test.ts }', () => {
 
   before('deploy ERC20Mock contract', async () => {
     const erc20Mock = await ethers.getContractFactory('ERC20Mock');
-    token = (await erc20Mock
-      .connect(deployer)
-      .deploy('MockToken', 'MT', 18)) as ERC20Mock;
+    token = await erc20Mock.connect(deployer).deploy('MockToken', 'MT', 18);
     await token.deployed();
     tokenDeployTx = await token.deployTransaction.wait();
   });
