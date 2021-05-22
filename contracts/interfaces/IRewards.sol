@@ -1,9 +1,15 @@
 pragma solidity ^0.7.6;
 
 interface IRewards {
-  event NewClaim(uint256 _amount, address _token, address _to);
-  event NewStake(uint256 _tokenID);
-  event NewUnstake(uint256 _tokenID, address to);
+  event NewClaim(
+    uint256 indexed amount,
+    address indexed positionId,
+    address indexed from
+  );
+
+  event NewStake(uint256 indexed positionId, address indexed from);
+
+  event NewUnstake(uint256 indexed positionId, address indexed from);
 
   function stake(uint256 _id) external;
 
@@ -17,11 +23,6 @@ interface IRewards {
   function staked() external view returns (uint256[] memory);
 
   /**
-   * returns available ALPHR reward amount to claim at request time
-   */
-  function getClaimableAmount() external view returns (uint256);
-
-  /**
    * Calculates rewards for all staked positions and
    * stores them in mapping
    * @dev because pool's tick average price is available
@@ -30,4 +31,9 @@ interface IRewards {
    * @dev can be called only by owner
    */
   function rollUp() external;
+
+  /**
+   * returns available ALPHR reward amount to claim at request time
+   */
+  function getClaimableAmount() external view returns (uint256);
 }

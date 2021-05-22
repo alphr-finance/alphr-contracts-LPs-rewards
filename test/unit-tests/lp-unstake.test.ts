@@ -17,10 +17,10 @@ import * as uniswapNftPosistionManager from '../../artifacts/@uniswap/v3-periphe
 import { ALPHR_TOKEN } from '../../constants/tokens';
 
 describe('LPs Rewards ::  unstake method test suite', () => {
-  let deployer, uniswap, user: SignerWithAddress;
+  let deployer, uniswap, user, other: SignerWithAddress;
 
   before('init signers', async () => {
-    [deployer, uniswap, user] = await ethers.getSigners();
+    [deployer, uniswap, user, other] = await ethers.getSigners();
   });
 
   let uniswapMock: MockContract;
@@ -71,18 +71,19 @@ describe('LPs Rewards ::  unstake method test suite', () => {
 
   it('reverts unstake tx if user does not have staked tokens', async () => {
     await expect(rewards.connect(user).unstake('1')).to.be.revertedWith(
-      'User must have staked tokens'
+      'Token is not staked'
     );
   });
 
   it('reverts unstake tx if token is not owned by user', async () => {
-    await rewards.connect(user).stake('1');
+    await rewards.connect(other).stake('2');
     await expect(rewards.connect(user).unstake('2')).to.be.revertedWith(
-      'User must owned this token'
+      'User must own this token'
     );
   });
 
   it('emits correct event in unstake tx', async () => {
+    await rewards.connect(user).stake('1');
     const tx = await rewards.connect(user).unstake('1');
     const txr = await tx.wait();
     const expectedEventName =

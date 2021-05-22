@@ -67,7 +67,7 @@ describe('LPs farming :: get user staked positions test suite { lp-get-user-toke
     let tx = await rewards.connect(user).stake(1);
     let txr = await tx.wait();
     const expectedEventName =
-      rewards.interface.events['NewStake(uint256)'].name;
+      rewards.interface.events['NewStake(uint256,address)'].name;
     expect(txr.events[0].event).eq(expectedEventName);
   });
 

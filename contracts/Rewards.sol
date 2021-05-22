@@ -19,9 +19,11 @@ import {
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {PositionPower} from './libraries/PositionPower.sol';
+import '@openzeppelin/contracts/utils/EnumerableSet.sol';
 
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
+  using EnumerableSet for EnumerableSet.UintSet;
 
   // factory represents uniswapV3Factory
   address private factory;
@@ -32,12 +34,14 @@ contract Rewards is IRewards, Ownable {
 
   uint256 private blockReward = 0;
 
-  struct Position {
-    uint256 nftPosition; //  UNISWAP V3 nft token ID
+  EnumerableSet.UintSet private positions;
+  mapping(address => EnumerableSet.UintSet) usersPositions;
+
+  struct PositionMeta {
+    uint256 timestamp;
     uint256 blockNumber;
   }
-  // represents tokens that corresponds to particular user; TO DO change on Iterable maps
-  mapping(address => Position[]) private userPositions;
+  mapping(uint256 => PositionMeta) positionsMeta;
 
   constructor(
     address _factory,
@@ -51,112 +55,9 @@ contract Rewards is IRewards, Ownable {
     alphrPool = _alphrPool;
   }
 
-  function getBlockReward() external view returns (uint256) {
-    return blockReward;
-  }
+  receive() external payable {}
 
-  function setBlockReward(uint256 _blockReward) external onlyOwner {
-    blockReward = _blockReward;
-  }
-
-  function stake(uint256 _id) external override {
-    require(
-      INonfungiblePositionManager(nftManager).getApproved(_id) == address(this),
-      'Token should be approved before stake'
-    );
-
-    INonfungiblePositionManager(nftManager).transferFrom(
-      msg.sender,
-      address(this),
-      _id
-    );
-
-    userPositions[msg.sender].push(Position(_id, block.number));
-
-    emit NewStake(_id);
-  }
-
-  function unstake(uint256 _id) external override {
-    require(
-      userPositions[msg.sender].length > 0,
-      'User must have staked tokens'
-    );
-    uint256 index;
-    bool found = false;
-    // step 1 Find token
-    for (uint256 i = 0; i < userPositions[msg.sender].length; i++) {
-      if (userPositions[msg.sender][i].nftPosition == _id) {
-        index = i;
-        found = true;
-        break;
-      }
-    }
-
-    require(found, 'User must owned this token');
-
-    // step 2 Remove token from array
-    for (uint256 i = 0; i < userPositions[msg.sender].length - 1; i++) {
-      if (i >= index) {
-        userPositions[msg.sender][i] = userPositions[msg.sender][i + 1];
-      }
-    }
-    // step 3 decrease array length
-    userPositions[msg.sender].pop();
-    // step 4 send token to user
-    INonfungiblePositionManager(nftManager).transferFrom(
-      address(this),
-      msg.sender,
-      _id
-    );
-
-    // step 5 emit event
-    emit NewUnstake(_id, msg.sender);
-
-    // TBD: step 6 claim user reward?
-  }
-
-  function claim() external override {}
-
-  function getClaimableAmount() external view override returns (uint256) {
-    return 0;
-  }
-
-  function getPositionClaimableAmount(uint256 nftPos)
-    external
-    view
-    returns (uint256)
-  {
-    Position memory pos;
-    Position[] memory positions =
-      new Position[](userPositions[msg.sender].length);
-    positions = userPositions[msg.sender];
-
-    for (uint256 i = 0; i < positions.length; i++) {
-      if (positions[i].nftPosition == nftPos) {
-        pos = positions[i];
-      }
-    }
-    uint256 a = blockReward.div(100).mul(5);
-    uint256 b = block.number.sub(pos.blockNumber);
-    uint256 res = a.mul(b);
-
-    return res;
-  }
-
-  function staked() external view override returns (uint256[] memory) {
-    Position[] memory positions =
-      new Position[](userPositions[msg.sender].length);
-    positions = userPositions[msg.sender];
-    uint256[] memory ids = new uint256[](positions.length);
-    for (uint256 i = 0; i < positions.length; i++) {
-      ids[i] = positions[i].nftPosition;
-    }
-    return ids;
-  }
-
-  function rollUp() external override onlyOwner {
-    revert('not implemented');
-  }
+  fallback() external payable {}
 
   function setFactory(address _factory) external onlyOwner {
     require(_factory != address(0), 'Empty address');
@@ -176,24 +77,81 @@ contract Rewards is IRewards, Ownable {
     return nftManager;
   }
 
+  function setBlockReward(uint256 _blockReward) external onlyOwner {
+    blockReward = _blockReward;
+  }
+
+  function getBlockReward() external view returns (uint256) {
+    return blockReward;
+  }
+
+  function stake(uint256 _id) external override {
+    require(
+      INonfungiblePositionManager(nftManager).getApproved(_id) == address(this),
+      'Token should be approved before stake'
+    );
+
+    INonfungiblePositionManager(nftManager).transferFrom(
+      msg.sender,
+      address(this),
+      _id
+    );
+
+    positions.add(_id);
+    usersPositions[msg.sender].add(_id);
+    positionsMeta[_id] = PositionMeta(block.timestamp, block.number);
+
+    emit NewStake(_id, msg.sender);
+  }
+
+  function unstake(uint256 _id) external override {
+    require(positions.contains(_id), 'Token is not staked');
+
+    require(usersPositions[msg.sender].remove(_id), 'User must own this token');
+
+    INonfungiblePositionManager(nftManager).transferFrom(
+      address(this),
+      msg.sender,
+      _id
+    );
+    emit NewUnstake(_id, msg.sender);
+  }
+
+  function claim() external override {}
+
+  function staked() external view override returns (uint256[] memory staked) {
+    EnumerableSet.UintSet storage ids = usersPositions[msg.sender];
+    staked = new uint256[](ids.length());
+    for (uint256 i = 0; i < ids.length(); i++) {
+      staked[i] = ids.at(i);
+    }
+  }
+
+  function rollUp() external override onlyOwner {
+    revert('not implemented');
+  }
+
+  function getClaimableAmount() external view override returns (uint256) {
+    return 0;
+  }
+
+  function getPositionClaimableAmount(uint256 id)
+    external
+    view
+    returns (uint256)
+  {
+    uint256 a = blockReward.div(100).mul(5);
+    uint256 b = block.number.sub(positionsMeta[id].blockNumber);
+    uint256 res = a.mul(b);
+
+    return res;
+  }
+
   function getTokensAmountsFromPosition(uint256 _id)
     external
     view
     returns (uint256 token0Amount, uint256 token1Amount)
   {
-    //    bool found = false;
-    //    Position memory pos;
-    //    Position[] memory positions =
-    //      new Position[](userPositions[msg.sender].length);
-    //    positions = userPositions[msg.sender];
-    //    for (uint256 i = 0; i < positions.length; i++) {
-    //      if (positions[i].nftPosition == _id) {
-    //        pos = positions[i];
-    //        found = true;
-    //      }
-    //    }
-    //    require(found, 'User position not found');
-
     (, int24 poolTick, , , , , ) = IUniswapV3PoolState(alphrPool).slot0();
     (, , , , , int24 tickLower, int24 tickUpper, uint128 liquidity, , , , ) =
       INonfungiblePositionManager(nftManager).positions(_id);
@@ -210,8 +168,4 @@ contract Rewards is IRewards, Ownable {
       tickUpper
     );
   }
-
-  receive() external payable {}
-
-  fallback() external payable {}
 }
