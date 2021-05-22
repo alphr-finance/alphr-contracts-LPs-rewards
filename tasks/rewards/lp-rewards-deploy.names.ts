@@ -11,6 +11,8 @@ export const LP_DEPLOY = {
   NFT_MANAGER_ADDRESS_DESC: 'Address of UNISWAP NFT MANAGE contract',
   ALPHR_TOKEN_ADDRESS: 'alphr',
   ALPHR_TOKEN_ADDRESS_DESC: 'Address of alphr tokens',
+  ALPHR_TOKEN_POOL: 'pool',
+  ALPHR_TOKEN_POOL_DESC: 'Address of alphr tokens pool',
 
   // common
   CONTRACT_NAME: 'Rewards',
