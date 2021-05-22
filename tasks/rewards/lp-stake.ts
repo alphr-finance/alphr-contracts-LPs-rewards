@@ -11,7 +11,6 @@ export default task(LP_STAKE.NAME, LP_STAKE.DESC)
       'INonfungiblePositionManager',
       UNISWAP_V3_NFT_POSITION_MANAGER
     );
-    await hre.network.provider.send('hardhat_impersonateAccount', [from]);
     const signer = hre.ethers.provider.getSigner(from);
     await nftManager.connect(signer).approve(rew, tokenId);
 
