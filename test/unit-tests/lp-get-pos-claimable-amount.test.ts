@@ -59,7 +59,7 @@ describe('LPs farming :: test suite get position claimable amount test suite { l
     let tx = await rewards.connect(user).stake(50);
     let txr = await tx.wait();
     const expectedEventName =
-      rewards.interface.events['NewStake(uint256)'].name;
+      rewards.interface.events['NewStake(uint256,address)'].name;
     expect(txr.events[0].event).eq(expectedEventName);
   });
 

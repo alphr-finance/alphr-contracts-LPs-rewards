@@ -146,7 +146,8 @@ describe('Reward :: test reward contract', () => {
     await nonFungibleManager.connect(user).approve(rew.address, _id);
     let txLocal = await rew.connect(user).stake(_id);
     let txrLocal = txLocal.wait();
-    const expectedEventName = rew.interface.events['NewStake(uint256)'].name;
+    const expectedEventName =
+      rew.interface.events['NewStake(uint256,address)'].name;
     const actualEventName = (await txrLocal).events[2].event;
     expect(actualEventName).to.be.equal(expectedEventName);
   });
