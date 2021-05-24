@@ -2,24 +2,35 @@ pragma solidity =0.7.6;
 
 import './interfaces/IRewards.sol';
 
-import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
-import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
-import '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol';
-import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
+import {
+  IUniswapV3Factory
+} from '@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol';
+import {
+  IUniswapV3Pool
+} from '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
+import {
+  IUniswapV3PoolState
+} from '@uniswap/v3-core/contracts/interfaces/pool/IUniswapV3PoolState.sol';
+import {
+  INonfungiblePositionManager
+} from '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
 import {
   INonfungibleTokenPositionDescriptor
 } from '@uniswap/v3-periphery/contracts/interfaces/INonfungibleTokenPositionDescriptor.sol';
 import {
   IERC721Enumerable
 } from '@openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol';
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {
   IUniswapV3Pool
 } from '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
 import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {PositionPower} from './libraries/PositionPower.sol';
-import '@openzeppelin/contracts/utils/EnumerableSet.sol';
+import {EnumerableSet} from '@openzeppelin/contracts/utils/EnumerableSet.sol';
+import {TickMath} from '@uniswap/v3-core/contracts/libraries/TickMath.sol';
+import {FullMath} from '@uniswap/v3-core/contracts/libraries/FullMath.sol';
+import 'hardhat/console.sol';
 
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
@@ -131,24 +142,63 @@ contract Rewards is IRewards, Ownable {
     revert('not implemented');
   }
 
-  function getClaimableAmount() external view override returns (uint256) {
-    return 0;
-  }
-
-  function getPositionClaimableAmount(uint256 id)
+  function getClaimableAmount()
     external
     view
-    returns (uint256)
+    override
+    returns (uint256 claimableAmount)
   {
-    uint256 a = blockReward.div(100).mul(5);
-    uint256 b = block.number.sub(positionsMeta[id].blockNumber);
-    uint256 res = a.mul(b);
+    uint256 stakedPower = getStakedPositionsPower();
+    EnumerableSet.UintSet storage msgSenderPositions =
+      usersPositions[msg.sender];
+    for (uint256 i = 0; i < msgSenderPositions.length(); i++) {
+      claimableAmount += getPositionClaimableAmount(
+        msgSenderPositions.at(i),
+        stakedPower
+      );
+    }
+  }
 
-    return res;
+  /**
+   * @dev return sum of all positions' power;
+   */
+  function getStakedPositionsPower() internal view returns (uint256 power) {
+    for (uint256 i = 0; i < positions.length(); i++) {
+      power += calculatePositionPower(positions.at(i));
+    }
+  }
+
+  function calculatePositionPower(uint256 _id)
+    public
+    view
+    returns (uint256 positionPower)
+  {
+    (uint256 alphr, uint256 weth) = getTokensAmountsFromPosition(_id);
+    //todo replace with const;
+    address wethToken = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    //todo has to be replaces with oracle's time weight cumulative tick
+    (, int24 poolTick, , , , , ) = IUniswapV3PoolState(alphrPool).slot0();
+    uint256 rateEthToAlphr =
+      getQuoteAtTick(poolTick, 1000000000000000000, wethToken, alphrToken);
+    uint256 rate = rateEthToAlphr.div(10**18);
+    positionPower = weth.mul(rate);
+  }
+
+  function getPositionClaimableAmount(uint256 id, uint256 stakedPower)
+    internal
+    view
+    returns (uint256 positionClaimableAmount)
+  {
+    uint256 positionPower = calculatePositionPower(id);
+    uint256 share = positionPower.mul(10**20).div(stakedPower);
+    uint256 stakedBlocks = block.number - positionsMeta[id].blockNumber;
+    uint256 overallReward = stakedBlocks * blockReward;
+    positionClaimableAmount = share.mul(10**20).div(overallReward);
+    return positionClaimableAmount;
   }
 
   function getTokensAmountsFromPosition(uint256 _id)
-    external
+    public
     view
     returns (uint256 token0Amount, uint256 token1Amount)
   {
@@ -167,5 +217,27 @@ contract Rewards is IRewards, Ownable {
       tickLower,
       tickUpper
     );
+  }
+
+  function getQuoteAtTick(
+    int24 tick,
+    uint128 baseAmount,
+    address baseToken,
+    address quoteToken
+  ) internal pure returns (uint256 quoteAmount) {
+    uint160 sqrtRatioX96 = TickMath.getSqrtRatioAtTick(tick);
+
+    // Calculate quoteAmount with better precision if it doesn't overflow when multiplied by itself
+    if (sqrtRatioX96 <= type(uint128).max) {
+      uint256 ratioX192 = uint256(sqrtRatioX96) * sqrtRatioX96;
+      quoteAmount = baseToken < quoteToken
+        ? FullMath.mulDiv(ratioX192, baseAmount, 1 << 192)
+        : FullMath.mulDiv(1 << 192, baseAmount, ratioX192);
+    } else {
+      uint256 ratioX128 = FullMath.mulDiv(sqrtRatioX96, sqrtRatioX96, 1 << 64);
+      quoteAmount = baseToken < quoteToken
+        ? FullMath.mulDiv(ratioX128, baseAmount, 1 << 128)
+        : FullMath.mulDiv(1 << 128, baseAmount, ratioX128);
+    }
   }
 }
