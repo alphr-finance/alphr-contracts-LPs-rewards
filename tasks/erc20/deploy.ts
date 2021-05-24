@@ -10,6 +10,7 @@ task('erc20mock:deploy', 'deploy erc20 mock contract')
       .then((deployer) => deployer.deploy(name, symbol, decimals))
       .then((token) => token.deployed())
       .then((rewDeployed) => {
+        console.log('Token contract address is: ', rewDeployed.address);
         return rewDeployed.address;
       });
     return address;
