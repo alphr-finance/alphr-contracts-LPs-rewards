@@ -30,7 +30,6 @@ import {PositionPower} from './libraries/PositionPower.sol';
 import {EnumerableSet} from '@openzeppelin/contracts/utils/EnumerableSet.sol';
 import {TickMath} from '@uniswap/v3-core/contracts/libraries/TickMath.sol';
 import {FullMath} from '@uniswap/v3-core/contracts/libraries/FullMath.sol';
-import 'hardhat/console.sol';
 
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
@@ -193,7 +192,6 @@ contract Rewards is IRewards, Ownable {
     uint256 positionPower = calculatePositionPower(id);
     uint256 share = positionPower.mul(10**20).div(stakedPower);
     uint256 stakedBlocks = block.number - positionsMeta[id].blockNumber;
-    console.log(stakedBlocks);
     uint256 overallReward = stakedBlocks * blockReward;
     positionClaimableAmount = share.mul(10**20).div(overallReward);
     return positionClaimableAmount;
