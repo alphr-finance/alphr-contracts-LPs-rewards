@@ -50,7 +50,6 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
 
     // TODO fix signTransaction issue
     await hre.run('uni:mint', {
-      from: '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
       token0: tokenAddress2,
       token1: tokenAddress1,
       low: '3000',
