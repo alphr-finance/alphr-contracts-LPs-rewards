@@ -48,7 +48,25 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
       sqrtprice: '100',
     });
 
-    // TODO fix signTransaction issue
+    const ercToken1 = await hre.ethers.getContractAt(
+      'ERC20Mock',
+      tokenAddress1
+    );
+    const ercToken2 = await hre.ethers.getContractAt(
+      'ERC20Mock',
+      tokenAddress2
+    );
+    const user = await hre.ethers.getSigner(
+      '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266'
+    );
+
+    await ercToken1
+      .connect(user)
+      .approve(UNISWAP_V3_NFT_POSITION_MANAGER, utils.parseEther('1000'));
+    await ercToken2
+      .connect(user)
+      .approve(UNISWAP_V3_NFT_POSITION_MANAGER, utils.parseEther('1000'));
+
     await hre.run('uni:mint', {
       token0: tokenAddress2,
       token1: tokenAddress1,
