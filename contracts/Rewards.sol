@@ -56,7 +56,7 @@ contract Rewards is IRewards, Ownable {
   }
   mapping(uint256 => PositionMeta) positionsMeta;
 
-  mapping(uint256 => uint256) public rolledUpClaimableAmounts;
+  mapping(uint256 => uint256) rolledUpClaimableAmounts;
 
   constructor(
     address _factory,
@@ -98,6 +98,10 @@ contract Rewards is IRewards, Ownable {
 
   function getBlockReward() external view returns (uint256) {
     return blockReward;
+  }
+
+  function getRolledUpPosition(uint256 _id) external view onlyOwner returns (uint256) {
+    return rolledUpClaimableAmounts[_id];
   }
 
   function stake(uint256 _id) external override {
@@ -146,9 +150,9 @@ contract Rewards is IRewards, Ownable {
     uint256 stakedPower = getStakedPositionsPower();
     for (uint256 i = 0; i < positions.length(); i++) {
       uint256 posID = positions.at(i);
+      rolledUpClaimableAmounts[posID] = getPositionClaimableAmount(posID, stakedPower);
       positionsMeta[posID].timestamp = block.timestamp;
       positionsMeta[posID].blockNumber = block.number;
-      rolledUpClaimableAmounts[posID] = getPositionClaimableAmount(posID, stakedPower);
     }
   }
 
