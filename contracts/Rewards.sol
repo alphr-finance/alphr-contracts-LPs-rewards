@@ -56,7 +56,7 @@ contract Rewards is IRewards, Ownable {
   }
   mapping(uint256 => PositionMeta) positionsMeta;
 
-  mapping(uint256 => uint256) rolledUpClaimableAmounts;
+  mapping(uint256 => uint256) public rolledUpClaimableAmounts;
 
   constructor(
     address _factory,
@@ -148,7 +148,7 @@ contract Rewards is IRewards, Ownable {
       uint256 posID = positions.at(i);
       positionsMeta[posID].timestamp = block.timestamp;
       positionsMeta[posID].blockNumber = block.number;
-      rolledUpClaimableAmounts[posID] += getPositionClaimableAmount(posID, stakedPower);
+      rolledUpClaimableAmounts[posID] = getPositionClaimableAmount(posID, stakedPower);
     }
   }
 
