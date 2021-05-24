@@ -103,7 +103,7 @@ describe('Position claimable amount :: test suite for calculation of claimable r
       .connect(alphrPositionHolder_13251)
       .getClaimableAmount()
       .then((amountInt) => ethers.utils.formatUnits(amountInt.toString(), 18))
-      .then((amount) => console.log('\nresult:\t%s', amount.toString()));
+      .then((amount) => expect(amount).to.be.eq('19.120942474327764829'));
   });
 
   it('calculates correct claimable amount for 10863 staked position', async () => {
@@ -112,7 +112,7 @@ describe('Position claimable amount :: test suite for calculation of claimable r
       .connect(alphrPositionHolder_10863)
       .getClaimableAmount()
       .then((amountInt) => ethers.utils.formatUnits(amountInt.toString(), 18))
-      .then((amount) => console.log('\nresult:\t%s', amount.toString()));
+      .then((amount) => expect(amount).to.be.eq('80.87905752567223517'));
   });
 
   after('reset node fork', async () => {
