@@ -21,7 +21,7 @@ import { BigNumber } from 'ethers';
 import { sortedTokens } from '../../shared/tokenSort';
 import { computePoolAddress } from '../../shared/computePoolAddress';
 
-describe('Reward :: test reward contract', () => {
+describe('Reward :: test reward contract for mock tokens', () => {
   let deployer, user: SignerWithAddress;
   let rew: Rewards;
   let tx: ContractTransaction;
