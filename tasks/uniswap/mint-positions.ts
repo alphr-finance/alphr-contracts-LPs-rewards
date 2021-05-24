@@ -3,11 +3,10 @@
 import { task } from 'hardhat/config';
 import { UNISWAP_V3_NFT_POSITION_MANAGER } from './../../constants/uniswaps';
 import { UNISWAP_MINT } from './mint-position.names';
-import { TICK_SPACINGS } from './../../test/shared/constants';
-import { getMinTick, getMaxTick } from './../../test/shared/ticks';
+import { TICK_SPACINGS } from '../../shared/constants';
+import { getMinTick, getMaxTick } from '../../shared/ticks';
 
 export const MintTask = task('uni:mint', 'mint tokens')
-  .addParam(UNISWAP_MINT.FROM, UNISWAP_MINT.FROM_DESC)
   .addParam(UNISWAP_MINT.TOKEN0_ADDRESS, UNISWAP_MINT.TOKEN0_ADDRESS_DESC)
   .addParam(UNISWAP_MINT.TOKEN1_ADDRESS, UNISWAP_MINT.TOKEN1_ADDRESS_DESC)
   .addParam(UNISWAP_MINT.TICK_LOWER, UNISWAP_MINT.TICK_LOWER_DESC)
@@ -22,7 +21,6 @@ export const MintTask = task('uni:mint', 'mint tokens')
   .setAction(
     async (
       {
-        from,
         token0,
         token1,
         low,
@@ -41,7 +39,7 @@ export const MintTask = task('uni:mint', 'mint tokens')
         'INonfungiblePositionManager',
         UNISWAP_V3_NFT_POSITION_MANAGER
       );
-      let tx = await nftManager.connect(from).mint(
+      let tx = await nftManager.mint(
         {
           token0: token0,
           token1: token1,

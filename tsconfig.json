@@ -4,8 +4,7 @@
     "module": "commonjs",
     "strict": false,
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "downlevelIteration": true,
+    "resolveJsonModule": true
   },
   "include": ["tasks", "test", "scripts"],
   "files": ["hardhat.config.ts"]

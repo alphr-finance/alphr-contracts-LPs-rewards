@@ -19,5 +19,5 @@ export default task(LP_STAKE.NAME, LP_STAKE.DESC)
       rew
     );
     await rewContract.connect(signer).stake(tokenId);
-    console.log('Token has been successfully stored');
+    console.log('Token with tokentID', tokenId, 'has been successfully stored');
   });

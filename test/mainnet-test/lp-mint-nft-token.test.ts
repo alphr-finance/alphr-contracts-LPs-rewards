@@ -14,11 +14,13 @@ import {
 
 import { INonfungiblePositionManager } from '../../typechain';
 import { ALPHR_TOKEN, WETH9 } from '../../constants/tokens';
-import { FeeAmount, MaxUint128, TICK_SPACINGS } from '../shared/constants';
-import { getMinTick, getMaxTick } from '../shared/ticks';
-import { encodePriceSqrt } from '../shared/encodePriceSqrt';
+import { FeeAmount, MaxUint128, TICK_SPACINGS } from '../../shared/constants';
+import { getMinTick, getMaxTick } from '../../shared/ticks';
+import { encodePriceSqrt } from '../../shared/encodePriceSqrt';
 import { IERC20 } from '../../typechain';
 import { BigNumber } from 'ethers';
+import { sortedTokens } from '../../shared/tokenSort';
+import { computePoolAddress } from '../../shared/computePoolAddress';
 
 describe('Reward :: test reward contract', () => {
   let deployer, user: SignerWithAddress;
@@ -48,6 +50,14 @@ describe('Reward :: test reward contract', () => {
       'INonfungiblePositionManager',
       UNISWAP_V3_NFT_POSITION_MANAGER
     )) as INonfungiblePositionManager;
+
+    const [token0, token1] = sortedTokens(WETH9, ALPHR_TOKEN);
+    const expectedAddress = computePoolAddress(
+      UNISWAP_V3_FACTORY,
+      [token0, token1],
+      FeeAmount.MEDIUM
+    );
+    console.log(expectedAddress);
     await (
       await nonFungibleManager.createAndInitializePoolIfNecessary(
         ALPHR_TOKEN,
@@ -129,7 +139,6 @@ describe('Reward :: test reward contract', () => {
     );
     txr = await tx.wait();
     _id = txr.events[4].args.tokenId.toString();
-    console.log('mint after');
   });
 
   it('user now owned of token', async () => {

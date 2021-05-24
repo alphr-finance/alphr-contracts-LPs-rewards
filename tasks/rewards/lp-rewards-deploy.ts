@@ -12,7 +12,5 @@ export default task(LP_DEPLOY.NAME, LP_DEPLOY.DESC)
         .getContractFactory(LP_DEPLOY.CONTRACT_NAME)
         .then((deployer) => deployer.deploy(fc, nft, alphr, pool))
         .then((rewards) => rewards.deployed())
-        .then((rewDeployed) =>
-          console.log('Contracs Address:', rewDeployed.address)
-        )
+        .then((rewDeployed) => rewDeployed.address)
   );
