@@ -15,8 +15,6 @@ export const UNISWAP_MINT = {
   TICK_LOWER_DESC: '',
   TICK_UPPER: 'up',
   TICK_UPPER_DESC: '',
-  FROM: 'from',
-  FROM_DESC: '',
   RECIPIENT: 'recipient',
   RECIPIENT_DESC: 'nft token holder',
   AMOUNT0_DESIRED: 'des0',
