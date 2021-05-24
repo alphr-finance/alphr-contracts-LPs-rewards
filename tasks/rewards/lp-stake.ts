@@ -19,8 +19,5 @@ export default task(LP_STAKE.NAME, LP_STAKE.DESC)
       rew
     );
     await rewContract.connect(signer).stake(tokenId);
-    console.log(
-      'Rewards contract now handle the token: ',
-      await nftManager.ownerOf(tokenId)
-    );
+    console.log('Token has been successfully stored');
   });
