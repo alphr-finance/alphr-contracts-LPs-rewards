@@ -41,11 +41,6 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
     await rewards.setBlockReward(ethers.utils.parseUnits('1', 18));
   });
 
-  before(
-    'turn OFF automine ',
-    async () => await network.provider.send('evm_setAutomine', [false])
-  );
-
   let positions = [
     { pos: 13251, addr: '0xE4D91516D19d0B9a6Ed7fAd28fbAC031928f1352' },
     { pos: 10863, addr: '0x034c0A702131e6dcC8c9B76F085eFcDFB3a1aC0c' },
@@ -65,6 +60,7 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
       await rewards.connect(alphrPositionHolder).stake(positionID);
     });
   }
+
   it('mine 100 blocks to generate rewards per block', async () => {
     for (let i = 0; i <= 100; i++) {
       await network.provider.send('evm_mine');
