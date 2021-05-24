@@ -41,6 +41,11 @@ describe('Position claimable amount :: test suite for calculation of claimable r
     await rewards.setBlockReward(ethers.utils.parseUnits('1', 18));
   });
 
+  before(
+    'turn OFF automine ',
+    async () => await network.provider.send('evm_setAutomine', [false])
+  );
+
   let alphrPositionHolder_13251;
   it('stake 13251 positions', async () => {
     const address = '0xE4D91516D19d0B9a6Ed7fAd28fbAC031928f1352';
@@ -53,11 +58,6 @@ describe('Position claimable amount :: test suite for calculation of claimable r
       .approve(rewards.address, positionID);
     await rewards.connect(alphrPositionHolder_13251).stake(positionID);
   });
-
-  before(
-    'turn OFF automine ',
-    async () => await network.provider.send('evm_setAutomine', [false])
-  );
 
   let alphrPositionHolder_10863;
   it('stake 10863 positions', async () => {
