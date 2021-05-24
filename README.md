@@ -33,7 +33,7 @@ Deployed Mock WETH tokens:
     0xaD94edE5fAaac6f75E6D9Aa286a3FC1AA8aF38fb
 Deployed LPs rewards contract: 
 
-    0x6BE8D25c4CeCB255B30311641F5c3b0fb1C98dca
+    0x4Ea4e80dba5E21591e11B5c774b9e80D53b9C84B
 
 
 ### mint ERC 20
