@@ -37,6 +37,7 @@ import {
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.UintSet;
+  using EnumerableSet for EnumerableSet.AddressSet;
 
   // factory represents uniswapV3Factory
   address private factory;
@@ -47,6 +48,7 @@ contract Rewards is IRewards, Ownable {
 
   uint256 private blockReward = 0;
 
+  EnumerableSet.AddressSet private users;
   EnumerableSet.UintSet private positions;
   mapping(address => EnumerableSet.UintSet) usersPositions;
 
@@ -55,6 +57,8 @@ contract Rewards is IRewards, Ownable {
     uint256 blockNumber;
   }
   mapping(uint256 => PositionMeta) positionsMeta;
+
+  mapping(address => uint256) rolledUpClaimableAmounts;
 
   constructor(
     address _factory,
@@ -110,6 +114,7 @@ contract Rewards is IRewards, Ownable {
       _id
     );
 
+    users.add(msg.sender);
     positions.add(_id);
     usersPositions[msg.sender].add(_id);
     positionsMeta[_id] = PositionMeta(block.timestamp, block.number);
@@ -141,7 +146,17 @@ contract Rewards is IRewards, Ownable {
   }
 
   function rollUp() external override onlyOwner {
-    revert('not implemented');
+    uint256 stakedPower = getStakedPositionsPower();
+    for (uint256 i = 0; i < users.length(); i++) {
+      address userAddress = users.at(i);
+      EnumerableSet.UintSet storage curUserPositions = usersPositions[userAddress];
+      for (uint256 i = 0; i < curUserPositions.length(); i++) {
+        uint256 posID = curUserPositions.at(i);
+        positionsMeta[posID].timestamp = block.timestamp;
+        positionsMeta[posID].blockNumber = block.number;
+        rolledUpClaimableAmounts[userAddress] += getPositionClaimableAmount(posID, stakedPower);
+      }
+    }
   }
 
   function getClaimableAmount()
