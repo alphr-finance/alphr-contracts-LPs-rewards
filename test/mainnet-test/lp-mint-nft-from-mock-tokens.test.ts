@@ -30,6 +30,7 @@ describe('Reward :: test reward contract', () => {
   let alphr;
   let weth;
   let _id: BigNumber;
+  let expectedAddress: string;
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
   });
@@ -63,24 +64,20 @@ describe('Reward :: test reward contract', () => {
         .mint(ethers.utils.parseUnits('100', await alphr.decimals()))
     ).wait();
     weth.connect(user).approve(UNISWAP_V3_NFT_POSITION_MANAGER, MaxUint128);
-    console.log(alphr.address);
-    console.log(weth.address);
   });
 
   before('create nft manager', async () => {
-    console.log('here');
     nonFungibleManager = (await ethers.getContractAt(
       'INonfungiblePositionManager',
       UNISWAP_V3_NFT_POSITION_MANAGER
     )) as INonfungiblePositionManager;
 
     const [token0, token1] = sortedTokens(alphr.address, weth.address);
-    const expectedAddress = computePoolAddress(
+    expectedAddress = computePoolAddress(
       UNISWAP_V3_FACTORY,
       [token0, token1],
       FeeAmount.MEDIUM
     );
-    console.log(expectedAddress);
     await nonFungibleManager.createAndInitializePoolIfNecessary(
       token0,
       token1,
@@ -110,11 +107,15 @@ describe('Reward :: test reward contract', () => {
     txr = await tx.wait();
     _id = txr.events[5].args.tokenId.toString();
   });
-  it('BLABLA', async () => {
-    console.log('here');
+
+  it('address of created pool is equal to computePoolAddress', async () => {
+    const [tokenA, tokenB] = sortedTokens(alphr.address, weth.address);
+    expect(await rew.getPoolAddress(tokenA, tokenB, 3000)).to.be.eq(
+      expectedAddress
+    );
   });
+
   it('user now owned of token', async () => {
-    console.log((await nonFungibleManager.balanceOf(user.address)).toString());
     expect(await nonFungibleManager.ownerOf(_id)).to.be.eq(user.address);
   });
 
