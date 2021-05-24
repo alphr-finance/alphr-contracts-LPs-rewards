@@ -25,6 +25,8 @@
     "@commitlint/config-conventional": "^12.0.1",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@typechain/ethers-v5": "^7.0.0",
+    "@typechain/hardhat": "^2.0.1",
     "@types/chai": "^4.2.17",
     "@types/jest": "^26.0.20",
     "@types/mocha": "^8.2.2",
@@ -45,6 +47,7 @@
     "ethers": "^5.1.4",
     "hardhat": "^2.2.1",
     "hardhat-log-remover": "^2.0.1",
+    "hardhat-tracer": "^1.0.0-alpha.6",
     "husky": "4",
     "jest": "^26.6.3",
     "lint-staged": ">=10",
@@ -53,10 +56,8 @@
     "solhint": "^3.3.4",
     "solhint-plugin-prettier": "^0.0.5",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.4",
-    "@typechain/ethers-v5": "^7.0.0",
-    "@typechain/hardhat": "^2.0.1",
-    "typechain": "^5.0.0"
+    "typechain": "^5.0.0",
+    "typescript": "^4.2.4"
   },
   "husky": {
     "hooks": {

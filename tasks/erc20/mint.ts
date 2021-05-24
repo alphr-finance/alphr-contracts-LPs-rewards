@@ -11,15 +11,15 @@ task('erc20mock:mint', 'erc20 mint token amount to msg sender')
 
     token = await hre.ethers.getContractAt('ERC20Mock', address);
 
-    console.log(
-      'Sender token balance before mint:\t',
-      (await token.balanceOf(sender.address)).toString()
-    );
+    // console.log(
+    //   'Sender token balance before mint:\t',
+    //   (await token.balanceOf(sender.address)).toString()
+    // );
     await token
       .connect(sender)
       .mint(hre.ethers.utils.parseUnits(amount, await token.decimals()));
-    console.log(
-      'Sender token balance after mint:\t',
-      (await token.balanceOf(sender.address)).toString()
-    );
+    // console.log(
+    //   'Sender token balance after mint:\t',
+    //   (await token.balanceOf(sender.address)).toString()
+    // );
   });
