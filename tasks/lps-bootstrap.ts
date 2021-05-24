@@ -115,5 +115,17 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
     });
 
     console.log('Successfully mint token with Id:', tokenID);
+
+    const rewardsContract = await hre.ethers.getContractAt(
+      'Rewards',
+      rewardsAddress
+    );
+
+    console.log('Start staking token with Id: ', tokenID);
+    await nonFungibleManager.approve(rewardsAddress, tokenID);
+
+    const tx = await rewardsContract.stake(tokenID);
+    const txr = await tx.wait();
+    console.log('Stake ends with status: ', await txr.status);
   }
 );
