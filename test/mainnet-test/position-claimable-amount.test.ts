@@ -41,6 +41,11 @@ describe('Position claimable amount :: test suite for calculation of claimable r
     await rewards.setBlockReward(ethers.utils.parseUnits('1', 18));
   });
 
+  before(
+    'turn OFF automine ',
+    async () => await network.provider.send('evm_setAutomine', [false])
+  );
+
   let alphrPositionHolder_13251;
   it('stake 13251 positions', async () => {
     const address = '0xE4D91516D19d0B9a6Ed7fAd28fbAC031928f1352';
@@ -53,11 +58,6 @@ describe('Position claimable amount :: test suite for calculation of claimable r
       .approve(rewards.address, positionID);
     await rewards.connect(alphrPositionHolder_13251).stake(positionID);
   });
-
-  before(
-    'turn OFF automine ',
-    async () => await network.provider.send('evm_setAutomine', [false])
-  );
 
   let alphrPositionHolder_10863;
   it('stake 10863 positions', async () => {
@@ -103,7 +103,7 @@ describe('Position claimable amount :: test suite for calculation of claimable r
       .connect(alphrPositionHolder_13251)
       .getClaimableAmount()
       .then((amountInt) => ethers.utils.formatUnits(amountInt.toString(), 18))
-      .then((amount) => console.log('\nresult:\t%s', amount.toString()));
+      .then((amount) => expect(amount).to.be.eq('19.120942474327764829'));
   });
 
   it('calculates correct claimable amount for 10863 staked position', async () => {
@@ -112,7 +112,7 @@ describe('Position claimable amount :: test suite for calculation of claimable r
       .connect(alphrPositionHolder_10863)
       .getClaimableAmount()
       .then((amountInt) => ethers.utils.formatUnits(amountInt.toString(), 18))
-      .then((amount) => console.log('\nresult:\t%s', amount.toString()));
+      .then((amount) => expect(amount).to.be.eq('80.87905752567223517'));
   });
 
   after('reset node fork', async () => {

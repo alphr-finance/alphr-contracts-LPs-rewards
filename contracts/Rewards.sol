@@ -179,9 +179,10 @@ contract Rewards is IRewards, Ownable {
     //todo has to be replaces with oracle's time weight cumulative tick
     (, int24 poolTick, , , , , ) = IUniswapV3PoolState(alphrPool).slot0();
     uint256 rateEthToAlphr =
-      getQuoteAtTick(poolTick, 1000000000000000000, wethToken, alphrToken);
+      getQuoteAtTick(poolTick, 1**18, wethToken, alphrToken);
     uint256 rate = rateEthToAlphr.div(10**18);
     positionPower = weth.mul(rate);
+    positionPower = positionPower.add(alphr);
   }
 
   function getPositionClaimableAmount(uint256 id, uint256 stakedPower)
@@ -192,6 +193,7 @@ contract Rewards is IRewards, Ownable {
     uint256 positionPower = calculatePositionPower(id);
     uint256 share = positionPower.mul(10**20).div(stakedPower);
     uint256 stakedBlocks = block.number - positionsMeta[id].blockNumber;
+    console.log(stakedBlocks);
     uint256 overallReward = stakedBlocks * blockReward;
     positionClaimableAmount = share.mul(10**20).div(overallReward);
     return positionClaimableAmount;
