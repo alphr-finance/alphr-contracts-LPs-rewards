@@ -42,3 +42,19 @@ Deployed LPs rewards contract:
 
     yarn hardhat --network rinkeby erc20mock:mintTo --address 0xaD94edE5fAaac6f75E6D9Aa286a3FC1AA8aF38fb --amount AMOUNT --to YOUR_ADDRESS
 
+### Local bootstrap
+
+start node
+
+> yarn hardhat node
+
+
+run dev bootstrap
+
+> yarn hardhat lps-rewards:bootstrap:local  --network localhost
+
+
+NOTE: import this address to wallet provider
+
+    Account #1: 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
+    Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
