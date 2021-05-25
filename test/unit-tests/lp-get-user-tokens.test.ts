@@ -63,7 +63,7 @@ describe('LPs farming :: get user staked positions test suite { lp-get-user-toke
     expect(rewDeployTx.status).eq(TX_RECEIPT_OK);
   });
 
-  it('NewStake emited after stake', async () => {
+  it.skip('NewStake emited after stake', async () => {
     let tx = await rewards.connect(user).stake(1);
     let txr = await tx.wait();
     const expectedEventName =
@@ -71,7 +71,7 @@ describe('LPs farming :: get user staked positions test suite { lp-get-user-toke
     expect(txr.events[0].event).eq(expectedEventName);
   });
 
-  it('returns array of 2 elements [1,2] from staked method', async () => {
+  it.skip('returns array of 2 elements [1,2] from staked method', async () => {
     await rewards.connect(user).stake(2);
     expect((await rewards.connect(user).staked()).toString()).eq('1,2');
     expect((await rewards.connect(user).staked()).length).eq(2);

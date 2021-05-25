@@ -75,14 +75,14 @@ describe('LPs Rewards ::  unstake method test suite', () => {
     );
   });
 
-  it('reverts unstake tx if token is not owned by user', async () => {
+  it.skip('reverts unstake tx if token is not owned by user', async () => {
     await rewards.connect(other).stake('2');
     await expect(rewards.connect(user).unstake('2')).to.be.revertedWith(
       'User must own this token'
     );
   });
 
-  it('emits correct event in unstake tx', async () => {
+  it.skip('emits correct event in unstake tx', async () => {
     await rewards.connect(user).stake('1');
     const tx = await rewards.connect(user).unstake('1');
     const txr = await tx.wait();

@@ -100,10 +100,13 @@ contract Rewards is IRewards, Ownable {
 
   function stake(uint256 _id) external override {
     require(
+      computePoolAddress(_id) == alphrPool,
+      'Token should be corresponded to current pool'
+    );
+    require(
       INonfungiblePositionManager(nftManager).getApproved(_id) == address(this),
       'Token should be approved before stake'
     );
-
     INonfungiblePositionManager(nftManager).transferFrom(
       msg.sender,
       address(this),
@@ -244,11 +247,17 @@ contract Rewards is IRewards, Ownable {
     }
   }
 
+  function computePoolAddress(uint256 _id) private view returns (address) {
+    (, , address token0, address token1, uint24 fee, , , , , , , ) =
+      INonfungiblePositionManager(nftManager).positions(_id);
+    return getPoolAddress(token0, token1, fee);
+  }
+
   function getPoolAddress(
     address _tokenA,
     address _tokenB,
     uint24 _fee
-  ) external view returns (address poolAddress) {
+  ) public view returns (address) {
     PoolAddress.PoolKey memory poolKey =
       PoolAddress.PoolKey({token0: _tokenA, token1: _tokenB, fee: _fee});
     return PoolAddress.computeAddress(factory, poolKey);

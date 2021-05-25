@@ -7,7 +7,6 @@ import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import {
-  ALPHR_UNISWAP_V3_POOL,
   UNISWAP_V3_FACTORY,
   UNISWAP_V3_NFT_POSITION_MANAGER,
 } from '../../constants/uniswaps';
@@ -34,18 +33,6 @@ describe('Reward :: test reward contract for mock tokens', () => {
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
   });
-
-  before('deploy rewards contract', async () => {
-    const Rewards = await ethers.getContractFactory('Rewards');
-    rew = (await Rewards.connect(deployer).deploy(
-      UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_POSITION_MANAGER,
-      ALPHR_TOKEN,
-      ALPHR_UNISWAP_V3_POOL
-    )) as Rewards;
-    await rew.deployed();
-  });
-
   before('get alphr token', async () => {
     const erc20Mock = await ethers.getContractFactory('ERC20Mock');
     alphr = await erc20Mock.connect(deployer).deploy('MockToken', 'MT', 18);
@@ -66,18 +53,30 @@ describe('Reward :: test reward contract for mock tokens', () => {
     weth.connect(user).approve(UNISWAP_V3_NFT_POSITION_MANAGER, MaxUint128);
   });
 
-  before('create nft manager', async () => {
-    nonFungibleManager = (await ethers.getContractAt(
-      'INonfungiblePositionManager',
-      UNISWAP_V3_NFT_POSITION_MANAGER
-    )) as INonfungiblePositionManager;
-
+  before('compute pool address', async () => {
     const [token0, token1] = sortedTokens(alphr.address, weth.address);
     expectedAddress = computePoolAddress(
       UNISWAP_V3_FACTORY,
       [token0, token1],
       FeeAmount.MEDIUM
     );
+  });
+  before('deploy rewards contract', async () => {
+    const Rewards = await ethers.getContractFactory('Rewards');
+    rew = (await Rewards.connect(deployer).deploy(
+      UNISWAP_V3_FACTORY,
+      UNISWAP_V3_NFT_POSITION_MANAGER,
+      ALPHR_TOKEN,
+      expectedAddress
+    )) as Rewards;
+    await rew.deployed();
+  });
+  before('create nft manager', async () => {
+    nonFungibleManager = (await ethers.getContractAt(
+      'INonfungiblePositionManager',
+      UNISWAP_V3_NFT_POSITION_MANAGER
+    )) as INonfungiblePositionManager;
+    const [token0, token1] = sortedTokens(alphr.address, weth.address);
     await nonFungibleManager.createAndInitializePoolIfNecessary(
       token0,
       token1,
@@ -143,6 +142,19 @@ describe('Reward :: test reward contract for mock tokens', () => {
     let actualTokens = await rew.connect(user).staked();
     expect(actualTokens.length).to.be.eq(1);
     expect(actualTokens.toString()).to.be.eq(_id);
+  });
+
+  it('revert when trying to stake token from another pool', async () => {
+    const address = '0xE4D91516D19d0B9a6Ed7fAd28fbAC031928f1352';
+    await network.provider.send('hardhat_impersonateAccount', [address]);
+    const alphrPositionHolder_13251 = ethers.provider.getSigner(address);
+    const positionID = 13251;
+    await nonFungibleManager
+      .connect(alphrPositionHolder_13251)
+      .approve(rew.address, positionID);
+    await expect(
+      rew.connect(alphrPositionHolder_13251).stake(positionID)
+    ).to.be.revertedWith('Token should be corresponded to current pool');
   });
 
   after('reset node fork', async () => {
