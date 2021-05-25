@@ -11,7 +11,7 @@ import {
 import { ALPHR_TOKEN } from '../../constants/tokens';
 import { ResetToBlock } from '../utils/reset-fork';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { ContractReceipt, ContractTransaction, utils } from 'ethers';
+import { ContractReceipt, utils } from 'ethers';
 import { FeeAmount, MaxUint128, TICK_SPACINGS } from '../../shared/constants';
 import { sortedTokens } from '../../shared/tokenSort';
 import { encodePriceSqrt } from '../../shared/encodePriceSqrt';
@@ -21,10 +21,11 @@ import { getMaxTick, getMinTick } from '../../shared/ticks';
 describe('Roll up :: calculation of claimable reward amount for positions { roll-up.test.ts }', () => {
   let deployer, user: SignerWithAddress;
   let rew: Rewards;
-  let tx: ContractTransaction;
   let txr: ContractReceipt;
   let nonFungibleManager: INonfungiblePositionManager;
   let alphr, weth;
+  let positions = [];
+
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
   });
@@ -75,12 +76,10 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
     );
   });
 
-  let txs = [];
-  let positions = [];
   before('mint token for user', async () => {
     const [tokenA, tokenB] = sortedTokens(alphr.address, weth.address);
     for (let i = 0; i < 10; i++) {
-      tx = await nonFungibleManager.connect(user).mint(
+      let tx = await nonFungibleManager.connect(user).mint(
         {
           token0: tokenA,
           token1: tokenB,
@@ -96,13 +95,13 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
         },
         { gasLimit: 12450000 }
       );
-      txs.push(tx);
 
       txr = await tx.wait();
       let _id = txr.events[5].args.tokenId.toString();
       positions.push(_id);
-      console.log(_id);
     }
+
+    console.log('positions: ', positions);
   });
 
   before('set block reward', async () => {
@@ -110,7 +109,6 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
   });
 
   it('emit stake events', async () => {
-    console.log('pos.len ', positions.length);
     for (let i = 0; i < positions.length; i++) {
       console.log(positions[i]);
       await nonFungibleManager.connect(user).approve(rew.address, positions[i]);
@@ -124,6 +122,7 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
   });
 
   for (let i = 0; i < 2; i++) {
+    // eslint-disable-next-line jest/expect-expect
     it(
       '[' + i + '] mine 100 blocks to generate rewards per block',
       async () => {
@@ -135,6 +134,7 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
       }
     );
 
+    // eslint-disable-next-line jest/expect-expect
     it('[' + i + '] roll up', async () => {
       await rew.rollUp();
 
