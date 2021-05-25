@@ -247,7 +247,7 @@ contract Rewards is IRewards, Ownable {
     }
   }
 
-  function computePoolAddress(uint256 _id) private view returns (address) {
+  function computePoolAddress(uint256 _id) public view returns (address) {
     (, , address token0, address token1, uint24 fee, , , , , , , ) =
       INonfungiblePositionManager(nftManager).positions(_id);
     return getPoolAddress(token0, token1, fee);
