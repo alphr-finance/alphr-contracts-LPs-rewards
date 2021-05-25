@@ -78,15 +78,6 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
     expect(currentBlockNumber - blockNumber).to.be.eq(100);
   });
 
-  it('calculates correct claimable amount for 13251 staked position', async () => {
-    // eslint-disable-next-line jest/valid-expect-in-promise
-    await rewards
-      .connect(alphrPositionHolder_13251)
-      .getClaimableAmount()
-      .then((amountInt) => ethers.utils.formatUnits(amountInt.toString(), 18))
-      .then((amount) => console.log('\nresult:\t%s', amount.toString()));
-  });
-
   it('send 1000 ALPHR to rewards contract', async () => {
     alphr = (await ethers.getContractAt('IERC20', ALPHR_TOKEN)) as IERC20;
 
@@ -113,21 +104,21 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
   it('claim for alphrPositionHolder_13251', async () => {
     // eslint-disable-next-line jest/valid-expect-in-promise
 
-    console.log(
-      'Before Claim:\t',
-      ethers.utils.formatUnits(
-        await alphr.balanceOf(alphrPositionHolder_13251.address),
-        18
-      )
+    let balanceBefore = await alphr.balanceOf(
+      alphrPositionHolder_13251.address
     );
+    console.log('Before Claim:\t', ethers.utils.formatUnits(balanceBefore, 18));
+
     await rewards.connect(alphrPositionHolder_13251).claim();
-    console.log(
-      'After Claim:\t',
-      ethers.utils.formatUnits(
-        await alphr.balanceOf(alphrPositionHolder_13251.address),
-        18
-      )
-    );
+
+    let balanceAfter = await alphr.balanceOf(alphrPositionHolder_13251.address);
+    console.log('After Claim:\t', ethers.utils.formatUnits(balanceAfter, 18));
+
+    let claimableAmount = await rewards
+      .connect(alphrPositionHolder_13251)
+      .getClaimableAmount();
+
+    expect(claimableAmount).to.be.eq(balanceAfter.sub(balanceBefore));
   });
 
   after('reset node fork', async () => {
