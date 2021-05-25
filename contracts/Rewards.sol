@@ -134,11 +134,33 @@ contract Rewards is IRewards, Ownable {
   }
 
   function claim() external override {
-    uint256 claimableAmount = getClaimableAmount();
+    uint256 claimableAmount = getClaimableAmountAndReset();
     require(
       IERC20(alphrToken).transfer(msg.sender, claimableAmount),
       'Transfer error'
     );
+  }
+
+  function getClaimableAmountAndReset()
+    private
+    returns (uint256 claimableAmount)
+  {
+    uint256 stakedPower = getStakedPositionsPower();
+    EnumerableSet.UintSet storage msgSenderPositions =
+      usersPositions[msg.sender];
+    for (uint256 i = 0; i < msgSenderPositions.length(); i++) {
+      // Add position claimable amount to overall amount
+      claimableAmount += getPositionClaimableAmount(
+        msgSenderPositions.at(i),
+        stakedPower
+      );
+
+      // Reset position
+      positionsMeta[msgSenderPositions.at(i)] = PositionMeta(
+        block.timestamp,
+        block.number
+      );
+    }
   }
 
   function staked() external view override returns (uint256[] memory staked) {
