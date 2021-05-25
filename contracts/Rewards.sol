@@ -30,6 +30,9 @@ import {PositionPower} from './libraries/PositionPower.sol';
 import {EnumerableSet} from '@openzeppelin/contracts/utils/EnumerableSet.sol';
 import {TickMath} from '@uniswap/v3-core/contracts/libraries/TickMath.sol';
 import {FullMath} from '@uniswap/v3-core/contracts/libraries/FullMath.sol';
+import {
+  PoolAddress
+} from '@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol';
 
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
@@ -239,5 +242,15 @@ contract Rewards is IRewards, Ownable {
         ? FullMath.mulDiv(ratioX128, baseAmount, 1 << 128)
         : FullMath.mulDiv(1 << 128, baseAmount, ratioX128);
     }
+  }
+
+  function getPoolAddress(
+    address _tokenA,
+    address _tokenB,
+    uint24 _fee
+  ) external view returns (address poolAddress) {
+    PoolAddress.PoolKey memory poolKey =
+      PoolAddress.PoolKey({token0: _tokenA, token1: _tokenB, fee: _fee});
+    return PoolAddress.computeAddress(factory, poolKey);
   }
 }
