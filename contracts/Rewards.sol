@@ -34,6 +34,8 @@ import {
   PoolAddress
 } from '@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol';
 
+import '@nomiclabs/buidler/console.sol';
+
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.UintSet;
@@ -223,11 +225,21 @@ contract Rewards is IRewards, Ownable {
     view
     returns (uint256 positionClaimableAmount)
   {
+    console.log('pos id:\t\t%d', id);
+    console.log('stakedPower:\t%d', stakedPower);
     uint256 positionPower = calculatePositionPower(id);
+    console.log('positionPower:\t%d', positionPower);
     uint256 share = positionPower.mul(10**20).div(stakedPower);
+    console.log('share:\t\t%d', share);
     uint256 stakedBlocks = block.number - positionsMeta[id].blockNumber;
+    console.log('stakedBlocks:\t%d', stakedBlocks);
+    if (stakedBlocks <= 0) {
+      return 0;
+    }
     uint256 overallReward = stakedBlocks * blockReward;
+    console.log('overallReward:\t%d', overallReward);
     positionClaimableAmount = share.mul(10**20).div(overallReward);
+    console.log('claimableAmount:\t%d', positionClaimableAmount);
     return positionClaimableAmount;
   }
 
