@@ -14,8 +14,8 @@ import { encodePriceSqrt } from '../shared/encodePriceSqrt';
 import { computePoolAddress } from '../shared/computePoolAddress';
 
 export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
-  async (args, hre) => {
-    const [user] = await hre.ethers.getSigners();
+  async (_, hre) => {
+    const [user, dev] = await hre.ethers.getSigners();
     const mockAlphrAddress = await hre.run('erc20mock:deploy', {
       name: 'MockALPHR',
       symbol: 'MALPHR',
@@ -113,8 +113,9 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
         )
       );
 
+    const positionsIDs = [];
     for (let i = 0; i < 10; i++) {
-      const tokenID = await hre.run('uni:mint', {
+      const positionID = await hre.run('uni:mint', {
         token0: tokens[0],
         token1: tokens[1],
         low: FeeAmount.MEDIUM.toString(),
@@ -127,23 +128,21 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
         min1: '1',
         deadline: utils.parseEther('1').toString(),
       });
-      console.log('Successfully mint token with Id:', tokenID);
-      nonFungibleManager
+      positionsIDs.push(positionID);
+      console.log('Successfully mint token with Id:', positionID);
+      await nonFungibleManager
         .connect(user)
-        .transferFrom(
-          user.address,
-          '0x3BAc4942F9A7fF0c6Bd77ada33F1F9D0EE431452',
-          tokenID
-        );
+        .transferFrom(user.address, dev.address, positionID);
     }
 
-    await user
-      .sendTransaction({
-        to: '0x3BAc4942F9A7fF0c6Bd77ada33F1F9D0EE431452',
-        value: utils.parseEther('100'),
-      })
-      .then((tx) => tx.wait());
-
+    // stake some tokens
+    for (let i = 0; i < 3; i++) {
+      // approve first
+      const position = positionsIDs[i];
+      await nonFungibleManager.connect(dev).approve(rewardsAddress, position);
+      const rewards = await hre.ethers.getContractAt('Rewards', rewardsAddress);
+      await rewards.connect(dev).stake(position);
+    }
     await hre.network.provider.send('evm_setIntervalMining', [5000]);
   }
 );
