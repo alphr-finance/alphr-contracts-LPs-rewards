@@ -61,20 +61,25 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
     });
   }
 
-  it('mine 100 blocks to generate rewards per block', async () => {
-    for (let i = 0; i <= 100; i++) {
-      await network.provider.send('evm_mine');
-    }
-  });
+  for (let i = 0; i < 2; i++) {
+    it(
+      '[' + i + '] mine 100 blocks to generate rewards per block',
+      async () => {
+        for (let i = 0; i <= 100; i++) {
+          await network.provider.send('evm_mine');
+        }
+      }
+    );
 
-  it('roll up', async () => {
-    await rewards.rollUp();
+    it('[' + i + '] roll up', async () => {
+      await rewards.rollUp();
 
-    for (let i = 0; i < positions.length; i++) {
-      let val = await rewards.getRolledUpPosition(positions[i].pos);
-      console.log(ethers.utils.formatUnits(val.toString(), 18));
-    }
-  });
+      for (let i = 0; i < positions.length; i++) {
+        let val = await rewards.getRolledUpPosition(positions[i].pos);
+        console.log(ethers.utils.formatUnits(val.toString(), 18));
+      }
+    });
+  }
 
   after('reset node fork', async () => ResetToBlock(12472213));
 });
