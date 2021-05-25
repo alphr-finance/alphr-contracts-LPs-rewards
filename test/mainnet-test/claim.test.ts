@@ -49,6 +49,25 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
       .then((contract) => contract as INonfungiblePositionManager);
   });
 
+  before('send 1000 ALPHR to rewards contract', async () => {
+    alphr = (await ethers.getContractAt('IERC20', ALPHR_TOKEN)) as IERC20;
+
+    await network.provider.send('hardhat_impersonateAccount', [
+      alphrHolderAddress,
+    ]);
+    const alphrHolder = await ethers.provider.getSigner(alphrHolderAddress);
+
+    // send eth to pay tx
+    await deployer.sendTransaction({
+      to: alphrHolderAddress,
+      value: utils.parseEther('1000'),
+    });
+
+    await alphr
+      .connect(alphrHolder)
+      .transfer(rewards.address, utils.parseUnits('1000', alphrDecimals));
+  });
+
   before('set block reward', async () => {
     await rewards.setBlockReward(ethers.utils.parseUnits('1', 18));
   });
@@ -69,7 +88,7 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
   it('mine one block to confirm mempool', async () =>
     await network.provider.send('evm_mine'));
 
-  it('mine 100 blocks to generate rewards per block', async () => {
+  it('mine first 100 blocks to generate rewards per block', async () => {
     let blockNumber = await ethers.provider.getBlockNumber();
     for (let i = 0; i < 100; i++) {
       await network.provider.send('evm_mine');
@@ -78,30 +97,36 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
     expect(currentBlockNumber - blockNumber).to.be.eq(100);
   });
 
-  it('send 1000 ALPHR to rewards contract', async () => {
-    alphr = (await ethers.getContractAt('IERC20', ALPHR_TOKEN)) as IERC20;
-
-    await network.provider.send('hardhat_impersonateAccount', [
-      alphrHolderAddress,
-    ]);
-    const alphrHolder = await ethers.provider.getSigner(alphrHolderAddress);
-
-    // send eth to pay tx
-    await deployer.sendTransaction({
-      to: alphrHolderAddress,
-      value: utils.parseEther('1000'),
-    });
-
-    await alphr
-      .connect(alphrHolder)
-      .transfer(rewards.address, utils.parseUnits('1000', alphrDecimals));
-
-    expect(await alphr.balanceOf(rewards.address)).to.be.eq(
-      utils.parseUnits('1000', alphrDecimals)
-    );
+  it('calculates correct claimable amount after 100 mined blocks', async () => {
+    // eslint-disable-next-line jest/valid-expect-in-promise
+    await rewards
+      .connect(alphrPositionHolder_13251)
+      .getClaimableAmount()
+      .then((amountInt) =>
+        console.log(ethers.utils.formatUnits(amountInt.toString(), 18))
+      );
   });
 
-  it('claim for alphrPositionHolder_13251', async () => {
+  it('mine second 100 blocks to generate rewards per block', async () => {
+    let blockNumber = await ethers.provider.getBlockNumber();
+    for (let i = 0; i < 100; i++) {
+      await network.provider.send('evm_mine');
+    }
+    let currentBlockNumber = await ethers.provider.getBlockNumber();
+    expect(currentBlockNumber - blockNumber).to.be.eq(100);
+  });
+
+  it('calculates correct claimable amount after 200 mined blocks', async () => {
+    // eslint-disable-next-line jest/valid-expect-in-promise
+    await rewards
+      .connect(alphrPositionHolder_13251)
+      .getClaimableAmount()
+      .then((amountInt) =>
+        console.log(ethers.utils.formatUnits(amountInt.toString(), 18))
+      );
+  });
+
+  it('claim for alphrPositionHolder_13251 and then check if the claimable amount is 0', async () => {
     // eslint-disable-next-line jest/valid-expect-in-promise
 
     let balanceBefore = await alphr.balanceOf(
@@ -117,8 +142,7 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
     let claimableAmount = await rewards
       .connect(alphrPositionHolder_13251)
       .getClaimableAmount();
-
-    expect(claimableAmount).to.be.eq(balanceAfter.sub(balanceBefore));
+    expect(claimableAmount).to.be.eq(0);
   });
 
   after('reset node fork', async () => {
