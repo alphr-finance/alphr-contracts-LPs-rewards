@@ -133,7 +133,13 @@ contract Rewards is IRewards, Ownable {
     emit NewUnstake(_id, msg.sender);
   }
 
-  function claim() external override {}
+  function claim() external override {
+    uint256 claimableAmount = getAccountsClaimableAmount(msg.sender);
+    require(
+      IERC20(alphrToken).transfer(msg.sender, claimableAmount),
+      'Transfer error'
+    );
+  }
 
   function staked() external view override returns (uint256[] memory staked) {
     EnumerableSet.UintSet storage ids = usersPositions[msg.sender];
@@ -147,21 +153,37 @@ contract Rewards is IRewards, Ownable {
     revert('not implemented');
   }
 
-  function getClaimableAmount()
-    external
+  function getAccountsClaimableAmount(address account)
+    internal
     view
-    override
     returns (uint256 claimableAmount)
   {
     uint256 stakedPower = getStakedPositionsPower();
-    EnumerableSet.UintSet storage msgSenderPositions =
-      usersPositions[msg.sender];
+    EnumerableSet.UintSet storage msgSenderPositions = usersPositions[account];
     for (uint256 i = 0; i < msgSenderPositions.length(); i++) {
       claimableAmount += getPositionClaimableAmount(
         msgSenderPositions.at(i),
         stakedPower
       );
     }
+  }
+
+  function getClaimableAmount()
+    external
+    view
+    override
+    returns (uint256 claimableAmount)
+  {
+    // uint256 stakedPower = getStakedPositionsPower();
+    // EnumerableSet.UintSet storage msgSenderPositions =
+    //   usersPositions[msg.sender];
+    // for (uint256 i = 0; i < msgSenderPositions.length(); i++) {
+    //   claimableAmount += getPositionClaimableAmount(
+    //     msgSenderPositions.at(i),
+    //     stakedPower
+    //   );
+    claimableAmount = getAccountsClaimableAmount(msg.sender);
+    //}
   }
 
   /**
