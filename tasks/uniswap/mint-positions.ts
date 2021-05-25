@@ -56,7 +56,7 @@ export const MintTask = task('uni:mint', 'mint tokens')
         { gasLimit: 12450000 }
       );
       let txr = await tx.wait();
-      console.log('Minted tokenId:', txr.events[5].args.tokenId.toString());
+      // console.log('Minted tokenId:', txr.events[5].args.tokenId.toString());
 
       return txr.events[5].args.tokenId.toString();
     }
