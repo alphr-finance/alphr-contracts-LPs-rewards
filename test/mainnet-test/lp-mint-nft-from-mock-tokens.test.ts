@@ -7,7 +7,6 @@ import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import {
-  ALPHR_UNISWAP_V3_POOL,
   UNISWAP_V3_FACTORY,
   UNISWAP_V3_NFT_POSITION_MANAGER,
 } from '../../constants/uniswaps';
@@ -34,18 +33,6 @@ describe('Reward :: test reward contract for mock tokens', () => {
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
   });
-
-  before('deploy rewards contract', async () => {
-    const Rewards = await ethers.getContractFactory('Rewards');
-    rew = (await Rewards.connect(deployer).deploy(
-      UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_POSITION_MANAGER,
-      ALPHR_TOKEN,
-      ALPHR_UNISWAP_V3_POOL
-    )) as Rewards;
-    await rew.deployed();
-  });
-
   before('get alphr token', async () => {
     const erc20Mock = await ethers.getContractFactory('ERC20Mock');
     alphr = await erc20Mock.connect(deployer).deploy('MockToken', 'MT', 18);
@@ -66,18 +53,30 @@ describe('Reward :: test reward contract for mock tokens', () => {
     weth.connect(user).approve(UNISWAP_V3_NFT_POSITION_MANAGER, MaxUint128);
   });
 
-  before('create nft manager', async () => {
-    nonFungibleManager = (await ethers.getContractAt(
-      'INonfungiblePositionManager',
-      UNISWAP_V3_NFT_POSITION_MANAGER
-    )) as INonfungiblePositionManager;
-
+  before('compute pool address', async () => {
     const [token0, token1] = sortedTokens(alphr.address, weth.address);
     expectedAddress = computePoolAddress(
       UNISWAP_V3_FACTORY,
       [token0, token1],
       FeeAmount.MEDIUM
     );
+  });
+  before('deploy rewards contract', async () => {
+    const Rewards = await ethers.getContractFactory('Rewards');
+    rew = (await Rewards.connect(deployer).deploy(
+      UNISWAP_V3_FACTORY,
+      UNISWAP_V3_NFT_POSITION_MANAGER,
+      ALPHR_TOKEN,
+      expectedAddress
+    )) as Rewards;
+    await rew.deployed();
+  });
+  before('create nft manager', async () => {
+    nonFungibleManager = (await ethers.getContractAt(
+      'INonfungiblePositionManager',
+      UNISWAP_V3_NFT_POSITION_MANAGER
+    )) as INonfungiblePositionManager;
+    const [token0, token1] = sortedTokens(alphr.address, weth.address);
     await nonFungibleManager.createAndInitializePoolIfNecessary(
       token0,
       token1,
