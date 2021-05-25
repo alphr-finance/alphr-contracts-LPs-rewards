@@ -150,7 +150,7 @@ contract Rewards is IRewards, Ownable {
     uint256 stakedPower = getStakedPositionsPower();
     for (uint256 i = 0; i < positions.length(); i++) {
       uint256 posID = positions.at(i);
-      rolledUpClaimableAmounts[posID] = getPositionClaimableAmount(posID, stakedPower);
+      rolledUpClaimableAmounts[posID] += getPositionClaimableAmount(posID, stakedPower);
       positionsMeta[posID].timestamp = block.timestamp;
       positionsMeta[posID].blockNumber = block.number;
     }
