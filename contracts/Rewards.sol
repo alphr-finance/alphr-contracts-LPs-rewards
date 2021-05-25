@@ -37,6 +37,7 @@ import {
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.UintSet;
+  using EnumerableSet for EnumerableSet.AddressSet;
 
   // factory represents uniswapV3Factory
   address private factory;
@@ -49,6 +50,7 @@ contract Rewards is IRewards, Ownable {
 
   EnumerableSet.UintSet private positions;
   mapping(address => EnumerableSet.UintSet) usersPositions;
+  EnumerableSet.AddressSet users;
 
   struct PositionMeta {
     uint256 timestamp;
@@ -115,6 +117,8 @@ contract Rewards is IRewards, Ownable {
       'Token should be approved before stake'
     );
 
+    users.add(msg.sender);
+
     INonfungiblePositionManager(nftManager).transferFrom(
       msg.sender,
       address(this),
@@ -152,17 +156,32 @@ contract Rewards is IRewards, Ownable {
   }
 
   function rollUp() external override onlyOwner {
-    uint256 stakedPower = getStakedPositionsPower();
-    for (uint256 i = 0; i < positions.length(); i++) {
-      uint256 posID = positions.at(i);
-      rolledUpClaimableAmounts[posID] += getPositionClaimableAmount(
-        posID,
-        stakedPower
-      );
-      positionsMeta[posID].timestamp = block.timestamp;
-      positionsMeta[posID].blockNumber = block.number;
+    //    uint256 stakedPower = getStakedPositionsPower();
+
+    for (uint256 i = 0; i < users.length(); i++) {
+      address user = users.at(i);
+      EnumerableSet.UintSet storage userPositions1 = usersPositions[user];
+      for (uint256 j = 0; j < userPositions1.length(); j++) {
+        uint256 posID = userPositions1.at(j);
+        uint256 claimAmount = getPositionClaimableAmount(posID, 10e18);
+        IERC20(alphrToken).transfer(user, claimAmount);
+        positionsMeta[posID].timestamp = block.timestamp;
+        positionsMeta[posID].blockNumber = block.number;
+      }
     }
   }
+
+  //    uint256 stakedPower = getStakedPositionsPower();
+  //    for (uint256 i = 0; i < positions.length(); i++) {
+  //      uint256 posID = positions.at(i);
+  //      rolledUpClaimableAmounts[posID] += getPositionClaimableAmount(
+  //        posID,
+  //        stakedPower
+  //      );
+  //      positionsMeta[posID].timestamp = block.timestamp;
+  //      positionsMeta[posID].blockNumber = block.number;
+  //    }
+  //  }
 
   function getClaimableAmount()
     external
@@ -201,8 +220,8 @@ contract Rewards is IRewards, Ownable {
     //todo has to be replaces with oracle's time weight cumulative tick
     (, int24 poolTick, , , , , ) = IUniswapV3PoolState(alphrPool).slot0();
     uint256 rateEthToAlphr =
-      getQuoteAtTick(poolTick, 1**18, wethToken, alphrToken);
-    uint256 rate = rateEthToAlphr.div(10**18);
+      getQuoteAtTick(poolTick, 1e18, wethToken, alphrToken);
+    uint256 rate = rateEthToAlphr.div(10e18);
     positionPower = weth.mul(rate);
     positionPower = positionPower.add(alphr);
   }

@@ -8,7 +8,6 @@ import {
   UNISWAP_V3_FACTORY,
   UNISWAP_V3_NFT_POSITION_MANAGER,
 } from '../../constants/uniswaps';
-import { ALPHR_TOKEN } from '../../constants/tokens';
 import { ResetToBlock } from '../utils/reset-fork';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { ContractReceipt, utils } from 'ethers';
@@ -30,35 +29,39 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
     [deployer, user] = await ethers.getSigners();
   });
 
+  before('get alphr token', async () => {
+    const erc20Mock = await ethers.getContractFactory('ERC20Mock');
+    alphr = await erc20Mock.connect(deployer).deploy('MockToken', 'MT', 18);
+    await alphr.deployed();
+    await alphr
+      .connect(user)
+      .mint(ethers.utils.parseUnits('100', await alphr.decimals()));
+    alphr.connect(user).approve(UNISWAP_V3_NFT_POSITION_MANAGER, MaxUint128);
+  });
+
+  before('get weth token', async () => {
+    const erc20Mock = await ethers.getContractFactory('ERC20Mock');
+    weth = await erc20Mock.connect(deployer).deploy('MockToken20', 'MT20', 18);
+    await weth.deployed();
+    await weth
+      .connect(user)
+      .mint(ethers.utils.parseUnits('100', await alphr.decimals()));
+    weth.connect(user).approve(UNISWAP_V3_NFT_POSITION_MANAGER, MaxUint128);
+  });
+
   before('deploy rewards contract', async () => {
     const Rewards = await ethers.getContractFactory('Rewards');
     rew = (await Rewards.connect(deployer).deploy(
       UNISWAP_V3_FACTORY,
       UNISWAP_V3_NFT_POSITION_MANAGER,
-      ALPHR_TOKEN,
+      alphr.address,
       ALPHR_UNISWAP_V3_POOL
     )) as Rewards;
     await rew.deployed();
   });
 
-  before('get alphr token', async () => {
-    const erc20Mock = await ethers.getContractFactory('ERC20Mock');
-    alphr = await erc20Mock.connect(deployer).deploy('MockToken', 'MT', 18);
-    await alphr.deployed();
-    await (
-      await alphr
-        .connect(user)
-        .mint(ethers.utils.parseUnits('100', await alphr.decimals()))
-    ).wait();
-    alphr.connect(user).approve(UNISWAP_V3_NFT_POSITION_MANAGER, MaxUint128);
-    weth = await erc20Mock.connect(deployer).deploy('MockToken20', 'MT20', 18);
-    await weth.deployed();
-    await (
-      await weth
-        .connect(user)
-        .mint(ethers.utils.parseUnits('100', await alphr.decimals()))
-    ).wait();
-    weth.connect(user).approve(UNISWAP_V3_NFT_POSITION_MANAGER, MaxUint128);
+  before('send alphr tokens to rewards contract', async () => {
+    await alphr.mintTo(ethers.utils.parseUnits('300', 18), rew.address);
   });
 
   before('create nft manager', async () => {
@@ -78,7 +81,7 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
 
   before('mint token for user', async () => {
     const [tokenA, tokenB] = sortedTokens(alphr.address, weth.address);
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1; i++) {
       let tx = await nonFungibleManager.connect(user).mint(
         {
           token0: tokenA,
@@ -126,11 +129,9 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
     it(
       '[' + i + '] mine 100 blocks to generate rewards per block',
       async () => {
-        await network.provider.send('evm_setAutomine', [false]);
         for (let i = 0; i <= 100; i++) {
           await network.provider.send('evm_mine');
         }
-        await network.provider.send('evm_setAutomine', [true]);
       }
     );
 
