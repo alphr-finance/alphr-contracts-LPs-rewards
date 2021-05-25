@@ -144,6 +144,19 @@ describe('Reward :: test reward contract for mock tokens', () => {
     expect(actualTokens.toString()).to.be.eq(_id);
   });
 
+  it('revert when trying to stake token from another pool', async () => {
+    const address = '0xE4D91516D19d0B9a6Ed7fAd28fbAC031928f1352';
+    await network.provider.send('hardhat_impersonateAccount', [address]);
+    const alphrPositionHolder_13251 = ethers.provider.getSigner(address);
+    const positionID = 13251;
+    await nonFungibleManager
+      .connect(alphrPositionHolder_13251)
+      .approve(rew.address, positionID);
+    await expect(
+      rew.connect(alphrPositionHolder_13251).stake(positionID)
+    ).to.be.revertedWith('Token should be corresponded to current pool');
+  });
+
   after('reset node fork', async () => {
     await network.provider.request({
       method: 'hardhat_reset',
