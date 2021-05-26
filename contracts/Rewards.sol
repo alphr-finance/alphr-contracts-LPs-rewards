@@ -92,15 +92,6 @@ contract Rewards is IRewards, Ownable {
     return blockReward;
   }
 
-  function getRolledUpPosition(uint256 _id)
-    external
-    view
-    onlyOwner
-    returns (uint256)
-  {
-    return rolledUpClaimableAmounts[_id];
-  }
-
   function stake(uint256 _id) external override {
     require(
       computePoolAddress(_id) == alphrPool,
