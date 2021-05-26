@@ -68,6 +68,7 @@
     }
   },
   "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^4.1.0",
     "hardhat-gas-reporter": "^1.0.4"
   }
 }

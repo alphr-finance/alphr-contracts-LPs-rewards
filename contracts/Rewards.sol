@@ -25,7 +25,7 @@ import '@openzeppelin/contracts/proxy/Initializable.sol';
 import {
   IUniswapV3Pool
 } from '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
-import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {PositionPower} from './libraries/PositionPower.sol';
 import {EnumerableSet} from '@openzeppelin/contracts/utils/EnumerableSet.sol';
@@ -35,7 +35,7 @@ import {
   PoolAddress
 } from '@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol';
 
-contract Rewards is IRewards, Ownable, Initializable {
+contract Rewards is IRewards, OwnableUpgradeable, Initializable {
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.UintSet;
 
