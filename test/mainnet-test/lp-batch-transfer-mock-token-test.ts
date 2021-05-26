@@ -88,4 +88,14 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
       rew.batchTransfer(userAddresses, userAmounts)
     ).to.be.revertedWith('Arrays must have at least one element');
   });
+
+  it('revert batch transfer while calling from non-owner', async () => {
+    let userAddresses = [user.address, deployer.address];
+    let userAmounts = [
+      ethers.utils.parseUnits('10', await alphr.decimals()),
+      ethers.utils.parseUnits('20', await alphr.decimals()),
+    ];
+    await expect(rew.connect(user).batchTransfer(userAddresses, userAmounts)).to
+      .be.reverted;
+  });
 });
