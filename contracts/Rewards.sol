@@ -50,12 +50,6 @@ contract Rewards is IRewards, OwnableUpgradeable {
   EnumerableSet.UintSet private positions;
   mapping(address => EnumerableSet.UintSet) usersPositions;
 
-  struct PositionMeta {
-    uint256 timestamp;
-    uint256 blockNumber;
-  }
-  mapping(uint256 => PositionMeta) positionsMeta;
-
   function initialize(
     address _factory,
     address _nftManager,
@@ -117,7 +111,6 @@ contract Rewards is IRewards, OwnableUpgradeable {
 
     positions.add(_id);
     usersPositions[msg.sender].add(_id);
-    positionsMeta[_id] = PositionMeta(block.timestamp, block.number);
 
     emit NewStake(_id, msg.sender);
   }
@@ -135,74 +128,12 @@ contract Rewards is IRewards, OwnableUpgradeable {
     emit NewUnstake(_id, msg.sender);
   }
 
-  function claim() external override {}
-
   function staked() external view override returns (uint256[] memory staked) {
     EnumerableSet.UintSet storage ids = usersPositions[msg.sender];
     staked = new uint256[](ids.length());
     for (uint256 i = 0; i < ids.length(); i++) {
       staked[i] = ids.at(i);
     }
-  }
-
-  function rollUp() external override onlyOwner {
-    revert('not implemented');
-  }
-
-  function getClaimableAmount()
-    external
-    view
-    override
-    returns (uint256 claimableAmount)
-  {
-    uint256 stakedPower = getStakedPositionsPower();
-    EnumerableSet.UintSet storage msgSenderPositions =
-      usersPositions[msg.sender];
-    for (uint256 i = 0; i < msgSenderPositions.length(); i++) {
-      claimableAmount += getPositionClaimableAmount(
-        msgSenderPositions.at(i),
-        stakedPower
-      );
-    }
-  }
-
-  /**
-   * @dev return sum of all positions' power;
-   */
-  function getStakedPositionsPower() internal view returns (uint256 power) {
-    for (uint256 i = 0; i < positions.length(); i++) {
-      power += calculatePositionPower(positions.at(i));
-    }
-  }
-
-  function calculatePositionPower(uint256 _id)
-    public
-    view
-    returns (uint256 positionPower)
-  {
-    (uint256 alphr, uint256 weth) = getTokensAmountsFromPosition(_id);
-    //todo replace with const;
-    address wethToken = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    //todo has to be replaces with oracle's time weight cumulative tick
-    (, int24 poolTick, , , , , ) = IUniswapV3PoolState(alphrPool).slot0();
-    uint256 rateEthToAlphr =
-      getQuoteAtTick(poolTick, 1**18, wethToken, alphrToken);
-    uint256 rate = rateEthToAlphr.div(10**18);
-    positionPower = weth.mul(rate);
-    positionPower = positionPower.add(alphr);
-  }
-
-  function getPositionClaimableAmount(uint256 id, uint256 stakedPower)
-    internal
-    view
-    returns (uint256 positionClaimableAmount)
-  {
-    uint256 positionPower = calculatePositionPower(id);
-    uint256 share = positionPower.mul(10**20).div(stakedPower);
-    uint256 stakedBlocks = block.number - positionsMeta[id].blockNumber;
-    uint256 overallReward = stakedBlocks * blockReward;
-    positionClaimableAmount = share.mul(10**20).div(overallReward);
-    return positionClaimableAmount;
   }
 
   function getTokensAmountsFromPosition(uint256 _id)
@@ -225,28 +156,6 @@ contract Rewards is IRewards, OwnableUpgradeable {
       tickLower,
       tickUpper
     );
-  }
-
-  function getQuoteAtTick(
-    int24 tick,
-    uint128 baseAmount,
-    address baseToken,
-    address quoteToken
-  ) internal pure returns (uint256 quoteAmount) {
-    uint160 sqrtRatioX96 = TickMath.getSqrtRatioAtTick(tick);
-
-    // Calculate quoteAmount with better precision if it doesn't overflow when multiplied by itself
-    if (sqrtRatioX96 <= type(uint128).max) {
-      uint256 ratioX192 = uint256(sqrtRatioX96) * sqrtRatioX96;
-      quoteAmount = baseToken < quoteToken
-        ? FullMath.mulDiv(ratioX192, baseAmount, 1 << 192)
-        : FullMath.mulDiv(1 << 192, baseAmount, ratioX192);
-    } else {
-      uint256 ratioX128 = FullMath.mulDiv(sqrtRatioX96, sqrtRatioX96, 1 << 64);
-      quoteAmount = baseToken < quoteToken
-        ? FullMath.mulDiv(ratioX128, baseAmount, 1 << 128)
-        : FullMath.mulDiv(1 << 128, baseAmount, ratioX128);
-    }
   }
 
   function computePoolAddress(uint256 _id) public view returns (address) {
