@@ -173,4 +173,18 @@ contract Rewards is IRewards, OwnableUpgradeable {
       PoolAddress.PoolKey({token0: _tokenA, token1: _tokenB, fee: _fee});
     return PoolAddress.computeAddress(factory, poolKey);
   }
+
+  function batchTransfer(address[] memory addresses, uint256[] memory amounts)
+    public
+    onlyOwner
+  {
+    require(
+      addresses.length == amounts.length,
+      'Arrays must have the same length'
+    );
+    require(addresses.length > 0, 'Arrays must have at least one element');
+    for (uint256 i = 0; i < addresses.length; i++) {
+      IERC20(alphrToken).transfer(addresses[i], amounts[i]);
+    }
+  }
 }
