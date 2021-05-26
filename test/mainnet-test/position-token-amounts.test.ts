@@ -71,12 +71,6 @@ describe('Position amounts :: test suite for ALPHR - WETH amount for positions',
       const [a, w] = await rewards.getTokensAmountsFromPosition(positionID);
       expect(a).to.be.eq(amounts.alphr);
       expect(w).to.be.eq(amounts.weth);
-      // console.log(
-      //   'position id: %s\talphr: %s\tweth: %s',
-      //   positionID,
-      //   ethers.utils.formatUnits(a.toString(), 18),
-      //   ethers.utils.formatUnits(w.toString(), 18)
-      // );
     }
   });
 
