@@ -88,13 +88,13 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
   it('mine one block to confirm mempool', async () =>
     await network.provider.send('evm_mine'));
 
-  it('mine first 100 blocks to generate rewards per block', async () => {
+  it('mine 99 blocks to generate rewards per block', async () => {
     let blockNumber = await ethers.provider.getBlockNumber();
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 99; i++) {
       await network.provider.send('evm_mine');
     }
     let currentBlockNumber = await ethers.provider.getBlockNumber();
-    expect(currentBlockNumber - blockNumber).to.be.eq(100);
+    expect(currentBlockNumber - blockNumber).to.be.eq(99);
   });
 
   it('calculates correct claimable amount after 100 mined blocks', async () => {
@@ -103,11 +103,14 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
       .connect(alphrPositionHolder_13251)
       .getClaimableAmount()
       .then((amountInt) =>
-        console.log(ethers.utils.formatUnits(amountInt.toString(), 18))
+        console.log(
+          'result: ',
+          ethers.utils.formatUnits(amountInt.toString(), 18)
+        )
       );
   });
 
-  it('mine second 100 blocks to generate rewards per block', async () => {
+  it('mine 100 blocks to generate rewards per block', async () => {
     let blockNumber = await ethers.provider.getBlockNumber();
     for (let i = 0; i < 100; i++) {
       await network.provider.send('evm_mine');
@@ -122,7 +125,10 @@ describe('LP Rewards :: claim test suite { claim.test.ts }', () => {
       .connect(alphrPositionHolder_13251)
       .getClaimableAmount()
       .then((amountInt) =>
-        console.log(ethers.utils.formatUnits(amountInt.toString(), 18))
+        console.log(
+          'result: ',
+          ethers.utils.formatUnits(amountInt.toString(), 18)
+        )
       );
   });
 
