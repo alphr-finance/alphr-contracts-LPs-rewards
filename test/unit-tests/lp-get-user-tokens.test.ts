@@ -1,6 +1,6 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
-import { ethers, network, providers } from 'hardhat';
+import { ethers, upgrades, network, providers } from 'hardhat';
 import { expect } from 'chai';
 import { Rewards } from '../../typechain/Rewards';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -30,13 +30,12 @@ describe('LPs farming :: get user staked positions test suite { lp-get-user-toke
     //TODO: delete after this values will be added into constants
     uniswapMock = await deployMockContract(uniswap, UNI.abi);
     const Rewards = await ethers.getContractFactory('Rewards');
-    rewards = (await Rewards.connect(deployer).deploy(
+    rewards = await upgrades.deployProxy(Rewards, [
       UNISWAP_V3_FACTORY,
       uniswapMock.address,
       ALPHR_TOKEN,
-      ALPHR_UNISWAP_V3_POOL
-    )) as Rewards;
-    await rewards.deployed();
+      ALPHR_UNISWAP_V3_POOL,
+    ]);
     rewDeployTx = await rewards.deployTransaction.wait();
   });
 

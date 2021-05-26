@@ -1,6 +1,6 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
-import { ethers, network } from 'hardhat';
+import { ethers, upgrades, network } from 'hardhat';
 import { utils } from 'ethers';
 import { ContractTransaction, ContractReceipt } from 'ethers';
 import { Rewards } from '../../typechain';
@@ -36,13 +36,12 @@ describe('Reward :: test reward contract', () => {
 
   before('deploy rewards contract', async () => {
     const Rewards = await ethers.getContractFactory('Rewards');
-    rew = (await Rewards.connect(deployer).deploy(
+    rew = await upgrades.deployProxy(Rewards, [
       UNISWAP_V3_FACTORY,
       UNISWAP_V3_NFT_POSITION_MANAGER,
       ALPHR_TOKEN,
-      ALPHR_UNISWAP_V3_POOL
-    )) as Rewards;
-    await rew.deployed();
+      ALPHR_UNISWAP_V3_POOL,
+    ]);
   });
 
   before('create nft manager', async () => {

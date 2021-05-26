@@ -1,7 +1,6 @@
-//@ts-ignore
 /* eslint-disable jest/valid-expect */
-
-import { ethers, network } from 'hardhat';
+//@ts-ignore
+import { ethers, upgrades, network } from 'hardhat';
 import { Rewards } from '../../typechain';
 import {
   ALPHR_UNISWAP_V3_POOL,
@@ -14,17 +13,13 @@ import { ALPHR_TOKEN } from '../../constants/tokens';
 describe('Position amounts :: test suite for ALPHR - WETH amount for positions', () => {
   let rewards: Rewards;
   before('deploy LPs rewards farming contract', async () => {
-    rewards = await ethers
-      .getContractFactory('Rewards')
-      .then((factory) =>
-        factory.deploy(
-          UNISWAP_V3_FACTORY,
-          UNISWAP_V3_NFT_POSITION_MANAGER,
-          ALPHR_TOKEN,
-          ALPHR_UNISWAP_V3_POOL
-        )
-      )
-      .then((contract) => contract as Rewards);
+    const Rewards = await ethers.getContractFactory('Rewards');
+    rewards = await upgrades.deployProxy(Rewards, [
+      UNISWAP_V3_FACTORY,
+      UNISWAP_V3_NFT_POSITION_MANAGER,
+      ALPHR_TOKEN,
+      ALPHR_UNISWAP_V3_POOL,
+    ]);
   });
 
   // all alphr - weth nft positions IDs, prior to 12472213 block
