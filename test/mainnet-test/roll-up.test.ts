@@ -108,7 +108,7 @@ describe('Roll up :: calculation of claimable reward amount for positions { roll
     await rew.setBlockReward(ethers.utils.parseUnits('1', 18));
   });
 
-  it('emit stake events', async () => {
+  it.skip('emit stake events', async () => {
     for (let i = 0; i < positions.length; i++) {
       console.log(positions[i]);
       await nonFungibleManager.connect(user).approve(rew.address, positions[i]);
