@@ -34,8 +34,6 @@ import {
   PoolAddress
 } from '@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol';
 
-import '@nomiclabs/buidler/console.sol';
-
 contract Rewards is IRewards, Ownable {
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.UintSet;
