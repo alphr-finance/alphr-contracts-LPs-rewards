@@ -32,6 +32,7 @@ describe('Reward :: test reward contract', () => {
   let _id: BigNumber;
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
+    console.log({ deployer });
   });
 
   before('deploy rewards contract', async () => {

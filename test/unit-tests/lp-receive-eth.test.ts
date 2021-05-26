@@ -20,6 +20,7 @@ describe('Lp receive ETH test suite', () => {
 
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
+    console.log({ deployer });
   });
 
   before('deploy LPs rewards contract', async () => {
