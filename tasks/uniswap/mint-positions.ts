@@ -39,22 +39,19 @@ export const MintTask = task('uni:mint', 'mint tokens')
         'INonfungiblePositionManager',
         UNISWAP_V3_NFT_POSITION_MANAGER
       );
-      let tx = await nftManager.mint(
-        {
-          token0: token0,
-          token1: token1,
-          tickLower: getMinTick(TICK_SPACINGS[low]),
-          tickUpper: getMaxTick(TICK_SPACINGS[up]),
-          fee: fee,
-          recipient: recipient,
-          amount0Desired: des0,
-          amount1Desired: des1,
-          amount0Min: min0,
-          amount1Min: min1,
-          deadline: deadline,
-        },
-        { gasLimit: 12450000 }
-      );
+      let tx = await nftManager.mint({
+        token0: token0,
+        token1: token1,
+        tickLower: getMinTick(TICK_SPACINGS[low]),
+        tickUpper: getMaxTick(TICK_SPACINGS[up]),
+        fee: fee,
+        recipient: recipient,
+        amount0Desired: des0,
+        amount1Desired: des1,
+        amount0Min: min0,
+        amount1Min: min1,
+        deadline: deadline,
+      });
       let txr = await tx.wait();
       // console.log('Minted tokenId:', txr.events[5].args.tokenId.toString());
 
