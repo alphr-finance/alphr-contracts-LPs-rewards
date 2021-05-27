@@ -1,5 +1,5 @@
 // @ts-ignore
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import {
   ALPHR_UNISWAP_V3_POOL,
   UNISWAP_V3_FACTORY,
@@ -8,16 +8,13 @@ import {
 import { ALPHR_TOKEN } from '../constants/tokens';
 
 async function main() {
-  const rewards = await ethers
-    .getContractFactory('Rewards')
-    .then((deployFactory) =>
-      deployFactory.deploy(
-        UNISWAP_V3_FACTORY,
-        UNISWAP_V3_NFT_POSITION_MANAGER,
-        ALPHR_TOKEN,
-        ALPHR_UNISWAP_V3_POOL
-      )
-    );
+  const Rewards = await ethers.getContractFactory('Rewards');
+  const rewards = await upgrades.deployProxy(Rewards, [
+    UNISWAP_V3_FACTORY,
+    UNISWAP_V3_NFT_POSITION_MANAGER,
+    ALPHR_TOKEN,
+    ALPHR_UNISWAP_V3_POOL,
+  ]);
   console.log('Rewards contract deployed: %s', rewards.address);
 }
 

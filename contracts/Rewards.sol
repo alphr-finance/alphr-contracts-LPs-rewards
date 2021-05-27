@@ -21,10 +21,10 @@ import {
   IERC721Enumerable
 } from '@openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol';
 import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import {
   IUniswapV3Pool
 } from '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
-import {Ownable} from '@openzeppelin/contracts/access/Ownable.sol';
 import {SafeMath} from '@openzeppelin/contracts/math/SafeMath.sol';
 import {PositionPower} from './libraries/PositionPower.sol';
 import {EnumerableSet} from '@openzeppelin/contracts/utils/EnumerableSet.sol';
@@ -34,7 +34,7 @@ import {
   PoolAddress
 } from '@uniswap/v3-periphery/contracts/libraries/PoolAddress.sol';
 
-contract Rewards is IRewards, Ownable {
+contract Rewards is IRewards, OwnableUpgradeable {
   using SafeMath for uint256;
   using EnumerableSet for EnumerableSet.UintSet;
 
@@ -42,24 +42,26 @@ contract Rewards is IRewards, Ownable {
   address private factory;
   // nft manager INonfungiblePositionManager
   address private nftManager;
-  address private immutable alphrToken;
-  address private immutable alphrPool;
+  address private alphrToken;
+  address private alphrPool;
 
-  uint256 private blockReward = 0;
+  uint256 private blockReward;
 
   EnumerableSet.UintSet private positions;
   mapping(address => EnumerableSet.UintSet) usersPositions;
 
-  constructor(
+  function initialize(
     address _factory,
     address _nftManager,
     address _alphrToken,
     address _alphrPool
-  ) {
+  ) public initializer {
     factory = _factory;
     nftManager = _nftManager;
     alphrToken = _alphrToken;
     alphrPool = _alphrPool;
+    blockReward = 0;
+    __Ownable_init();
   }
 
   receive() external payable {}

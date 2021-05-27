@@ -1,6 +1,6 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
-import { ethers, network, providers } from 'hardhat';
+import { ethers, upgrades, network, providers } from 'hardhat';
 import { expect } from 'chai';
 import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -23,13 +23,12 @@ describe('LPs farming :: block rewards test suite { lp-block-rewards.test.ts }',
 
   before('deploy LPs rewards contract', async () => {
     const Rewards = await ethers.getContractFactory('Rewards');
-    rewards = (await Rewards.connect(deployer).deploy(
+    rewards = await upgrades.deployProxy(Rewards, [
       UNISWAP_V3_FACTORY,
       UNISWAP_V3_NFT_POSITION_MANAGER,
       ALPHR_TOKEN,
-      ALPHR_UNISWAP_V3_POOL
-    )) as Rewards;
-    await rewards.deployed();
+      ALPHR_UNISWAP_V3_POOL,
+    ]);
     rewDeployTx = await rewards.deployTransaction.wait();
   });
 
