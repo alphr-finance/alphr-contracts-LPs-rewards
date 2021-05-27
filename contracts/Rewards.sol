@@ -174,6 +174,24 @@ contract Rewards is IRewards, OwnableUpgradeable {
     return PoolAddress.computeAddress(factory, poolKey);
   }
 
+  function calculatePositionPower(
+    uint128 liquidity,
+    int24 tickLower,
+    int24 tickUpper,
+    int24 poolTick
+  ) external view returns (uint256) {
+    address wethToken = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    return
+      PositionPower.calculatePositionPower(
+        alphrToken,
+        wethToken,
+        liquidity,
+        tickLower,
+        tickUpper,
+        poolTick
+      );
+  }
+
   function batchERC20Transfer(
     address[] memory addresses,
     uint256[] memory amounts
