@@ -136,12 +136,14 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
     }
 
     // stake some tokens
+
     for (let i = 0; i < 3; i++) {
       // approve first
       const position = positionsIDs[i];
       await nonFungibleManager.connect(dev).approve(rewardsAddress, position);
       const rewards = await hre.ethers.getContractAt('Rewards', rewardsAddress);
       await rewards.connect(dev).stake(position);
+      console.log('Staked token: %s', position);
     }
     await hre.network.provider.send('evm_setIntervalMining', [5000]);
   }
