@@ -4,6 +4,7 @@ import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
 import { HardhatUserConfig } from 'hardhat/types';
 require('hardhat-tracer');
+require('@openzeppelin/hardhat-upgrades');
 
 const coinmarketcapAPIKey = '53cec9bc-a843-4e72-ab3b-8bf3df2fa87e';
 require('./tasks/index');
@@ -35,6 +36,7 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     bail: true,
+    timeout: 40000,
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS == 'false' ? false : true,

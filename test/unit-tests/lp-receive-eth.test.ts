@@ -1,6 +1,6 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
-import { network, ethers, providers } from 'hardhat';
+import { network, upgrades, ethers } from 'hardhat';
 import { expect } from 'chai';
 import { Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -16,27 +16,36 @@ import { utils } from 'ethers';
 describe('Lp receive ETH test suite', () => {
   let deployer, user: SignerWithAddress;
   let rewards: Rewards;
-  let rewDeployTx: providers.TransactionReceipt;
 
-  before('init signers', async () => {
-    [deployer, user] = await ethers.getSigners();
-  });
+  before(
+    'init signers',
+    async () => ([deployer, user] = await ethers.getSigners())
+  );
 
-  before('deploy LPs rewards contract', async () => {
-    const Rewards = await ethers.getContractFactory('Rewards');
-    rewards = (await Rewards.connect(deployer).deploy(
-      UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_POSITION_MANAGER,
-      ALPHR_TOKEN,
-      ALPHR_UNISWAP_V3_POOL
-    )) as Rewards;
-    await rewards.deployed();
-    rewDeployTx = await rewards.deployTransaction.wait();
-  });
+  before(
+    'deploy LPs rewards contract',
+    async () =>
+      (rewards = await ethers
+        .getContractFactory('Rewards')
+        .then((rewardsContractFactory) =>
+          rewardsContractFactory.connect(deployer)
+        )
+        .then((rewardsContractFactory) =>
+          upgrades.deployProxy(rewardsContractFactory, [
+            UNISWAP_V3_FACTORY,
+            UNISWAP_V3_NFT_POSITION_MANAGER,
+            ALPHR_TOKEN,
+            ALPHR_UNISWAP_V3_POOL,
+          ])
+        )
+        .then((rewardsContract) => rewardsContract.deployed())
+        .then((rewardsDeployedContract) => rewardsDeployedContract as Rewards))
+  );
 
-  it('contract deployed successfully', async () => {
-    expect(rewDeployTx.status).to.be.eq(TX_RECEIPT_OK);
-  });
+  it('contract deployed successfully', async () =>
+    expect((await rewards.deployTransaction.wait()).status).to.be.eq(
+      TX_RECEIPT_OK
+    ));
 
   it('send 100 ETH to rewards contract and check balance', async () => {
     await user.sendTransaction({
