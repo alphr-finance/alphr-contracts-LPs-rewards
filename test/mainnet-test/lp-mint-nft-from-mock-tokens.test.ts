@@ -12,7 +12,6 @@ import {
 } from '../../constants/uniswaps';
 
 import { INonfungiblePositionManager } from '../../typechain';
-import { ALPHR_TOKEN } from '../../constants/tokens';
 import { FeeAmount, MaxUint128, TICK_SPACINGS } from '../../shared/constants';
 import { getMinTick, getMaxTick } from '../../shared/ticks';
 import { encodePriceSqrt } from '../../shared/encodePriceSqrt';
@@ -22,7 +21,7 @@ import { computePoolAddress } from '../../shared/computePoolAddress';
 
 describe('Reward :: test reward contract for mock tokens', () => {
   let deployer, user: SignerWithAddress;
-  let rew: Rewards;
+  let rewards: Rewards;
   let tx: ContractTransaction;
   let txr: ContractReceipt;
   let nonFungibleManager: INonfungiblePositionManager;
@@ -33,6 +32,7 @@ describe('Reward :: test reward contract for mock tokens', () => {
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
   });
+
   before('get alphr token', async () => {
     const erc20Mock = await ethers.getContractFactory('ERC20Mock');
     alphr = await erc20Mock.connect(deployer).deploy('MockToken', 'MT', 18);
@@ -61,15 +61,27 @@ describe('Reward :: test reward contract for mock tokens', () => {
       FeeAmount.MEDIUM
     );
   });
-  before('deploy rewards contract as proxy', async () => {
-    const Rewards = await ethers.getContractFactory('Rewards');
-    rew = await upgrades.deployProxy(Rewards, [
-      UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_POSITION_MANAGER,
-      ALPHR_TOKEN,
-      expectedAddress,
-    ]);
-  });
+
+  before(
+    'deploy rewards contract as proxy',
+    async () =>
+      (rewards = await ethers
+        .getContractFactory('Rewards')
+        .then((rewardsContractFactory) =>
+          rewardsContractFactory.connect(deployer)
+        )
+        .then((rewardsContractFactory) =>
+          upgrades.deployProxy(rewardsContractFactory, [
+            UNISWAP_V3_FACTORY,
+            UNISWAP_V3_NFT_POSITION_MANAGER,
+            alphr.address,
+            expectedAddress,
+          ])
+        )
+        .then((rewardsContract) => rewardsContract.deployed())
+        .then((rewardsDeployedContract) => rewardsDeployedContract as Rewards))
+  );
+
   before('create nft manager', async () => {
     nonFungibleManager = (await ethers.getContractAt(
       'INonfungiblePositionManager',
@@ -108,7 +120,7 @@ describe('Reward :: test reward contract for mock tokens', () => {
 
   it('address of created pool is equal to computePoolAddress', async () => {
     const [tokenA, tokenB] = sortedTokens(alphr.address, weth.address);
-    expect(await rew.getPoolAddress(tokenA, tokenB, 3000)).to.be.eq(
+    expect(await rewards.getPoolAddress(tokenA, tokenB, 3000)).to.be.eq(
       expectedAddress
     );
   });
@@ -118,27 +130,27 @@ describe('Reward :: test reward contract for mock tokens', () => {
   });
 
   it('revert stake when token is not approved', async () => {
-    await expect(rew.connect(user).stake(_id)).to.be.revertedWith(
+    await expect(rewards.connect(user).stake(_id)).to.be.revertedWith(
       'Token should be approved before stake'
     );
   });
 
   it('emit stake event', async () => {
-    await nonFungibleManager.connect(user).approve(rew.address, _id);
-    let txLocal = await rew.connect(user).stake(_id);
+    await nonFungibleManager.connect(user).approve(rewards.address, _id);
+    let txLocal = await rewards.connect(user).stake(_id);
     let txrLocal = txLocal.wait();
     const expectedEventName =
-      rew.interface.events['NewStake(uint256,address)'].name;
+      rewards.interface.events['NewStake(uint256,address)'].name;
     const actualEventName = (await txrLocal).events[2].event;
     expect(actualEventName).to.be.equal(expectedEventName);
   });
 
-  it('rewards conatract is now owned the token id', async () => {
-    expect(await nonFungibleManager.ownerOf(_id)).to.be.eq(rew.address);
+  it('rewards contract is now owned the token id', async () => {
+    expect(await nonFungibleManager.ownerOf(_id)).to.be.eq(rewards.address);
   });
 
   it('reward is stored user tokenId', async () => {
-    let actualTokens = await rew.connect(user).staked();
+    let actualTokens = await rewards.connect(user).staked();
     expect(actualTokens.length).to.be.eq(1);
     expect(actualTokens.toString()).to.be.eq(_id);
   });
@@ -150,9 +162,9 @@ describe('Reward :: test reward contract for mock tokens', () => {
     const positionID = 13251;
     await nonFungibleManager
       .connect(alphrPositionHolder_13251)
-      .approve(rew.address, positionID);
+      .approve(rewards.address, positionID);
     await expect(
-      rew.connect(alphrPositionHolder_13251).stake(positionID)
+      rewards.connect(alphrPositionHolder_13251).stake(positionID)
     ).to.be.revertedWith('Token should be corresponded to current pool');
   });
 

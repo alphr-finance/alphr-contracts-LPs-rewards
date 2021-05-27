@@ -1,6 +1,6 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
-import { ethers } from 'hardhat';
+import { ethers, upgrades } from 'hardhat';
 import { ERC20Mock, Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
@@ -15,9 +15,12 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
   let deployer, user: SignerWithAddress;
   let rewards: Rewards;
   let alphr: ERC20Mock;
-  before('init signers', async () => {
-    [deployer, user] = await ethers.getSigners();
-  });
+
+  before(
+    'init signers',
+    async () => ([deployer, user] = await ethers.getSigners())
+  );
+
   before('get alphr token', async () => {
     alphr = await ethers
       .getContractFactory('ERC20Mock')
@@ -28,22 +31,25 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
       .then((deployedContract) => deployedContract as ERC20Mock);
   });
 
-  before('deploy rewards contract', async () => {
-    rewards = await ethers
-      .getContractFactory('Rewards')
-      .then((factory) =>
-        factory
-          .connect(deployer)
-          .deploy(
+  before(
+    'deploy LPs rewards contract',
+    async () =>
+      (rewards = await ethers
+        .getContractFactory('Rewards')
+        .then((rewardsContractFactory) =>
+          rewardsContractFactory.connect(deployer)
+        )
+        .then((rewardsContractFactory) =>
+          upgrades.deployProxy(rewardsContractFactory, [
             UNISWAP_V3_FACTORY,
             UNISWAP_V3_NFT_POSITION_MANAGER,
             alphr.address,
-            ALPHR_UNISWAP_V3_POOL
-          )
-      )
-      .then((rewards) => rewards.deployed())
-      .then((deployedContract) => deployedContract as Rewards);
-  });
+            ALPHR_UNISWAP_V3_POOL,
+          ])
+        )
+        .then((rewardsContract) => rewardsContract.deployed())
+        .then((rewardsDeployedContract) => rewardsDeployedContract as Rewards))
+  );
 
   before('mint tokens for rewards contract', async () => {
     await alphr.mintTo(
