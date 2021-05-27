@@ -98,4 +98,39 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
     await expect(rew.connect(user).batchTransfer(userAddresses, userAmounts)).to
       .be.reverted;
   });
+
+  describe('Reward :: test batch transfer for 200 signers', () => {
+    let users: SignerWithAddress[] = [];
+    before('init signers', async () => {
+      for (let i = 0; i < 200; i++) {
+        const [user1] = await ethers.getSigners();
+        users.push(user1);
+      }
+    });
+    before('mint tokens for rewards contract', async () => {
+      await (
+        await alphr.mintTo(
+          ethers.utils.parseUnits('130', await alphr.decimals()),
+          rew.address
+        )
+      ).wait();
+    });
+    it('successfull transfer tokens to users', async () => {
+      let transferSum = ethers.utils.parseUnits('1', await alphr.decimals());
+      let userAddresses = [];
+      let userAmounts = [];
+      for (var i in users) {
+        userAddresses.push(users[i].address);
+      }
+      for (let i = 0; i < 200; i++) {
+        userAmounts.push(transferSum);
+      }
+      const txLocal = await rew.batchTransfer(userAddresses, userAmounts);
+      const txrLocal = await txLocal.wait();
+      expect(txrLocal.status).to.be.eq(TX_RECEIPT_OK);
+    });
+    it('check rewards contract balance', async () => {
+      expect((await alphr.balanceOf(rew.address)).toString()).to.be.eq('0');
+    });
+  });
 });
