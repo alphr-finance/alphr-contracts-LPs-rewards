@@ -1,7 +1,7 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
 import { ethers } from 'hardhat';
-import { Rewards } from '../../typechain';
+import { ERC20Mock, Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
 import {
@@ -13,50 +13,58 @@ import { TX_RECEIPT_OK } from '../../constants/tx-status';
 
 describe('Reward :: test batch trasfer for mock tokens', () => {
   let deployer, user: SignerWithAddress;
-  let rew: Rewards;
-  let alphr;
+  let rewards: Rewards;
+  let alphr: ERC20Mock;
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
   });
   before('get alphr token', async () => {
-    const erc20Mock = await ethers.getContractFactory('ERC20Mock');
-    alphr = await erc20Mock.connect(deployer).deploy('MockToken', 'MT', 18);
-    await alphr.deployed();
+    alphr = await ethers
+      .getContractFactory('ERC20Mock')
+      .then((factory) =>
+        factory.connect(deployer).deploy('MockToken', 'MT', 18)
+      )
+      .then((contract) => contract.deployed())
+      .then((deployedContract) => deployedContract as ERC20Mock);
   });
 
   before('deploy rewards contract', async () => {
-    const Rewards = await ethers.getContractFactory('Rewards');
-    rew = (await Rewards.connect(deployer).deploy(
-      UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_POSITION_MANAGER,
-      alphr.address,
-      ALPHR_UNISWAP_V3_POOL
-    )) as Rewards;
-    await rew.deployed();
+    rewards = await ethers
+      .getContractFactory('Rewards')
+      .then((factory) =>
+        factory
+          .connect(deployer)
+          .deploy(
+            UNISWAP_V3_FACTORY,
+            UNISWAP_V3_NFT_POSITION_MANAGER,
+            alphr.address,
+            ALPHR_UNISWAP_V3_POOL
+          )
+      )
+      .then((rewards) => rewards.deployed())
+      .then((deployedContract) => deployedContract as Rewards);
   });
 
   before('mint tokens for rewards contract', async () => {
-    await (
-      await alphr.mintTo(
-        ethers.utils.parseUnits('100', await alphr.decimals()),
-        rew.address
-      )
-    ).wait();
+    await alphr.mintTo(
+      ethers.utils.parseUnits('100', await alphr.decimals()),
+      rewards.address
+    );
   });
 
   it('check rewards contract balance', async () => {
-    expect((await alphr.balanceOf(rew.address)).toString()).to.be.eq(
+    expect((await alphr.balanceOf(rewards.address)).toString()).to.be.eq(
       ethers.utils.parseUnits('100', await alphr.decimals())
     );
   });
 
-  it('successfull transfer tokens to users', async () => {
+  it('successful transfer tokens to users', async () => {
     let userAddresses = [user.address, deployer.address];
     let userAmounts = [
       ethers.utils.parseUnits('10', await alphr.decimals()),
       ethers.utils.parseUnits('20', await alphr.decimals()),
     ];
-    const txLocal = await rew.batchTransfer(userAddresses, userAmounts);
+    const txLocal = await rewards.batchTransfer(userAddresses, userAmounts);
     const txrLocal = await txLocal.wait();
     expect(txrLocal.status).to.be.eq(TX_RECEIPT_OK);
   });
@@ -68,7 +76,7 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
     expect((await alphr.balanceOf(deployer.address)).toString()).to.be.eq(
       ethers.utils.parseUnits('20', await alphr.decimals())
     );
-    expect((await alphr.balanceOf(rew.address)).toString()).to.be.eq(
+    expect((await alphr.balanceOf(rewards.address)).toString()).to.be.eq(
       ethers.utils.parseUnits('70', await alphr.decimals())
     );
   });
@@ -77,7 +85,7 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
     let userAddresses = [user.address, deployer.address];
     let userAmounts = [ethers.utils.parseUnits('10', await alphr.decimals())];
     await expect(
-      rew.batchTransfer(userAddresses, userAmounts)
+      rewards.batchTransfer(userAddresses, userAmounts)
     ).to.be.revertedWith('Arrays must have the same length');
   });
 
@@ -85,7 +93,7 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
     let userAddresses = [];
     let userAmounts = [];
     await expect(
-      rew.batchTransfer(userAddresses, userAmounts)
+      rewards.batchTransfer(userAddresses, userAmounts)
     ).to.be.revertedWith('Arrays must have at least one element');
   });
 
@@ -95,42 +103,43 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
       ethers.utils.parseUnits('10', await alphr.decimals()),
       ethers.utils.parseUnits('20', await alphr.decimals()),
     ];
-    await expect(rew.connect(user).batchTransfer(userAddresses, userAmounts)).to
-      .be.reverted;
+    await expect(
+      rewards.connect(user).batchTransfer(userAddresses, userAmounts)
+    ).to.be.reverted;
   });
 
   describe('Reward :: test batch transfer for 200 signers', () => {
     let users: SignerWithAddress[] = [];
-    before('init signers', async () => {
+    before('init batch transferrecipients', async () => {
       for (let i = 0; i < 200; i++) {
         const [user1] = await ethers.getSigners();
         users.push(user1);
       }
     });
     before('mint tokens for rewards contract', async () => {
-      await (
-        await alphr.mintTo(
-          ethers.utils.parseUnits('130', await alphr.decimals()),
-          rew.address
-        )
-      ).wait();
+      await alphr.mintTo(
+        ethers.utils.parseUnits('130', await alphr.decimals()),
+        rewards.address
+      );
     });
-    it('successfull transfer tokens to users', async () => {
+    it('successful transfer tokens to users', async () => {
       let transferSum = ethers.utils.parseUnits('1', await alphr.decimals());
       let userAddresses = [];
       let userAmounts = [];
-      for (var i in users) {
+      for (let i in users) {
         userAddresses.push(users[i].address);
       }
       for (let i = 0; i < 200; i++) {
         userAmounts.push(transferSum);
       }
-      const txLocal = await rew.batchTransfer(userAddresses, userAmounts);
+      const txLocal = await rewards.batchTransfer(userAddresses, userAmounts);
       const txrLocal = await txLocal.wait();
       expect(txrLocal.status).to.be.eq(TX_RECEIPT_OK);
     });
     it('check rewards contract balance', async () => {
-      expect((await alphr.balanceOf(rew.address)).toString()).to.be.eq('0');
+      await alphr
+        .balanceOf(rewards.address)
+        .then((balance) => expect(balance).to.be.eq('0'));
     });
   });
 });
