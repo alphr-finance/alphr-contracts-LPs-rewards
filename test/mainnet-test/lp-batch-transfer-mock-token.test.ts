@@ -142,10 +142,20 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
       const txrLocal = await txLocal.wait();
       expect(txrLocal.status).to.be.eq(TX_RECEIPT_OK);
     });
-    it('check rewards contract balance', async () => {
+    it('rewards contract balance is empty after transfer', async () => {
       await alphr
         .balanceOf(rewards.address)
         .then((balance) => expect(balance).to.be.eq('0'));
+    });
+
+    it('user balance increased', async () => {
+      let expectedAmount = ethers.utils.parseUnits(
+        '220',
+        await alphr.decimals()
+      );
+      await alphr
+        .balanceOf(users[1].address)
+        .then((balance) => expect(balance).to.be.eq(expectedAmount));
     });
   });
 });
