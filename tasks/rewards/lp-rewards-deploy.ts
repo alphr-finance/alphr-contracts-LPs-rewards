@@ -10,7 +10,11 @@ export default task(LP_DEPLOY.NAME, LP_DEPLOY.DESC)
     async ({ fc, nft, alphr, pool }, hre) =>
       await hre.ethers
         .getContractFactory(LP_DEPLOY.CONTRACT_NAME)
-        .then((deployer) => deployer.deploy(fc, nft, alphr, pool))
-        .then((rewards) => rewards.deployed())
-        .then((rewDeployed) => rewDeployed.address)
+        .then((deployer) =>
+          deployer
+            .deploy()
+            .then((rewards) => rewards.deployed())
+            .then((rewards) => rewards.initialize(fc, nft, alphr, pool))
+            .then((tx) => tx.to)
+        )
   );
