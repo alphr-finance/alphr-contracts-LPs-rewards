@@ -6,6 +6,9 @@ cache
 artifacts
 package-lock.json
 
+#abi from abi-exporter
+abi
+
 #jetbrains
 .idea
 
