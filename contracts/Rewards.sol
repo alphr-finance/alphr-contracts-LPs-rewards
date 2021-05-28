@@ -174,10 +174,10 @@ contract Rewards is IRewards, OwnableUpgradeable {
     return PoolAddress.computeAddress(factory, poolKey);
   }
 
-  function batchTransfer(address[] memory addresses, uint256[] memory amounts)
-    public
-    onlyOwner
-  {
+  function batchERC20Transfer(
+    address[] memory addresses,
+    uint256[] memory amounts
+  ) public onlyOwner {
     require(
       addresses.length == amounts.length,
       'Arrays must have the same length'
@@ -185,6 +185,20 @@ contract Rewards is IRewards, OwnableUpgradeable {
     require(addresses.length > 0, 'Arrays must have at least one element');
     for (uint256 i = 0; i < addresses.length; i++) {
       IERC20(alphrToken).transfer(addresses[i], amounts[i]);
+    }
+  }
+
+  function batchETHTransfer(
+    address payable[] memory addresses,
+    uint256[] memory amounts
+  ) public onlyOwner {
+    require(
+      addresses.length == amounts.length,
+      'Arrays must have the same length'
+    );
+    require(addresses.length > 0, 'Arrays must have at least one element');
+    for (uint256 i = 0; i < addresses.length; i++) {
+      addresses[i].transfer(amounts[i]);
     }
   }
 }

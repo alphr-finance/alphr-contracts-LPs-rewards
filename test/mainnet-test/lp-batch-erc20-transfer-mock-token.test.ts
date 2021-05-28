@@ -1,6 +1,6 @@
 /* eslint-disable jest/valid-expect */
 //@ts-ignore
-import { ethers, upgrades } from 'hardhat';
+import { ethers, network, upgrades } from 'hardhat';
 import { ERC20Mock, Rewards } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { expect } from 'chai';
@@ -70,7 +70,10 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
       ethers.utils.parseUnits('10', await alphr.decimals()),
       ethers.utils.parseUnits('20', await alphr.decimals()),
     ];
-    const txLocal = await rewards.batchTransfer(userAddresses, userAmounts);
+    const txLocal = await rewards.batchERC20Transfer(
+      userAddresses,
+      userAmounts
+    );
     const txrLocal = await txLocal.wait();
     expect(txrLocal.status).to.be.eq(TX_RECEIPT_OK);
   });
@@ -91,7 +94,7 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
     let userAddresses = [user.address, deployer.address];
     let userAmounts = [ethers.utils.parseUnits('10', await alphr.decimals())];
     await expect(
-      rewards.batchTransfer(userAddresses, userAmounts)
+      rewards.batchERC20Transfer(userAddresses, userAmounts)
     ).to.be.revertedWith('Arrays must have the same length');
   });
 
@@ -99,7 +102,7 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
     let userAddresses = [];
     let userAmounts = [];
     await expect(
-      rewards.batchTransfer(userAddresses, userAmounts)
+      rewards.batchERC20Transfer(userAddresses, userAmounts)
     ).to.be.revertedWith('Arrays must have at least one element');
   });
 
@@ -110,7 +113,7 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
       ethers.utils.parseUnits('20', await alphr.decimals()),
     ];
     await expect(
-      rewards.connect(user).batchTransfer(userAddresses, userAmounts)
+      rewards.connect(user).batchERC20Transfer(userAddresses, userAmounts)
     ).to.be.reverted;
   });
 
@@ -138,7 +141,10 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
       for (let i = 0; i < 200; i++) {
         userAmounts.push(transferSum);
       }
-      const txLocal = await rewards.batchTransfer(userAddresses, userAmounts);
+      const txLocal = await rewards.batchERC20Transfer(
+        userAddresses,
+        userAmounts
+      );
       const txrLocal = await txLocal.wait();
       expect(txrLocal.status).to.be.eq(TX_RECEIPT_OK);
     });
@@ -156,6 +162,20 @@ describe('Reward :: test batch trasfer for mock tokens', () => {
       await alphr
         .balanceOf(users[1].address)
         .then((balance) => expect(balance).to.be.eq(expectedAmount));
+    });
+  });
+  after('reset node fork', async () => {
+    await network.provider.request({
+      method: 'hardhat_reset',
+      params: [
+        {
+          forking: {
+            jsonRpcUrl:
+              'https://eth-mainnet.alchemyapi.io/v2/iHddcEw1BVe03s2BXSQx_r_BTDE-jDxB',
+            blockNumber: 12472213,
+          },
+        },
+      ],
     });
   });
 });
