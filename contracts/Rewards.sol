@@ -45,7 +45,8 @@ contract Rewards is IRewards, OwnableUpgradeable {
   address private alphrToken;
   address private alphrPool;
 
-  uint256 private blockReward;
+  uint256 private blockALPHRReward;
+  uint256 private blockETHReward;
 
   EnumerableSet.UintSet private positions;
   mapping(address => EnumerableSet.UintSet) usersPositions;
@@ -86,12 +87,20 @@ contract Rewards is IRewards, OwnableUpgradeable {
     return nftManager;
   }
 
-  function setBlockReward(uint256 _blockReward) external onlyOwner {
-    blockReward = _blockReward;
+  function setBlockALPHRReward(uint256 _blockReward) external onlyOwner {
+    blockALPHRReward = _blockReward;
   }
 
-  function getBlockReward() external view returns (uint256) {
-    return blockReward;
+  function getBlockALPHRReward() external view returns (uint256) {
+    return blockALPHRReward;
+  }
+
+  function setBlockETHReward(uint256 _blockReward) external onlyOwner {
+    blockETHReward = _blockReward;
+  }
+
+  function getBlockETHReward() external view returns (uint256) {
+    return blockETHReward;
   }
 
   function stake(uint256 _id) external override {
