@@ -37,18 +37,18 @@ describe('LPs farming :: block rewards test suite { lp-block-rewards.test.ts }',
   });
 
   it('get expected block reward', async () => {
-    expect('0').to.be.eq((await rewards.getBlockReward()).toString());
+    expect('0').to.be.eq((await rewards.getBlockALPHRReward()).toString());
   });
 
   it('set new block reward to 5 and check', async () => {
-    await rewards.connect(deployer).setBlockReward(5);
-    expect('5').to.be.eq((await rewards.getBlockReward()).toString());
+    await rewards.connect(deployer).setBlockALPHRReward(5);
+    expect('5').to.be.eq((await rewards.getBlockALPHRReward()).toString());
   });
 
   it('try to set new block reward by non-owner and revert', async () => {
-    await expect(rewards.connect(user).setBlockReward(10)).to.be.revertedWith(
-      'revert Ownable: caller is not the owner'
-    );
+    await expect(
+      rewards.connect(user).setBlockALPHRReward(10)
+    ).to.be.revertedWith('revert Ownable: caller is not the owner');
   });
 
   after('reset node fork', async () => {

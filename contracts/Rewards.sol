@@ -61,7 +61,8 @@ contract Rewards is IRewards, OwnableUpgradeable {
     nftManager = _nftManager;
     alphrToken = _alphrToken;
     alphrPool = _alphrPool;
-    blockReward = 0;
+    blockALPHRReward = 0;
+    blockETHReward = 0;
     __Ownable_init();
   }
 
