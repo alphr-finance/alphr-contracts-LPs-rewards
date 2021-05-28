@@ -4,9 +4,8 @@ export const LP_TEST_BOOTSTRAP = {
   NAME: 'lps-rewards:bootstrap:local',
   DESC: 'Bootstrap local environment for rewards',
 
-  // params
-  TO: 'to',
-  TO_DESC: 'address of user to bootstarp',
+  GANACHE: 'ganache',
+  GANACHE_DESC: 'set TRUE if connect to ganache node',
   // common
   CONTRACT_NAME: 'Rewards',
 };
