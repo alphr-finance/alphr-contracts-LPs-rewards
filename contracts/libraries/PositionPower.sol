@@ -13,15 +13,15 @@ library PositionPower {
     uint128 liquidity,
     int24 tickLower,
     int24 tickUpper,
-    int24 avaragePoolTick
+    int24 poolTick
   ) internal view returns (uint256 positionPower) {
     (uint256 alphr, uint256 weth) =
-      getAmountsFromPosition(liquidity, tickLower, tickUpper, avaragePoolTick);
+      getAmountsFromPosition(liquidity, tickLower, tickUpper, poolTick);
     uint256 rateEthToAlphr =
-      getQuoteAtTick(avaragePoolTick, 1**18, wethToken, alphrToken);
-    uint256 rate = rateEthToAlphr.div(10**18);
-    positionPower = weth.mul(rate);
-    positionPower = positionPower.add(alphr);
+      getQuoteAtTick(poolTick, 1e18, wethToken, alphrToken);
+    uint256 rate = rateEthToAlphr.div(1e18);
+    uint256 wethInAlphr = weth.mul(rateEthToAlphr).div(1e18);
+    positionPower = wethInAlphr.add(alphr);
   }
 
   function getQuoteAtTick(
@@ -50,17 +50,17 @@ library PositionPower {
     uint128 liquidity,
     int24 tickLower,
     int24 tickUpper,
-    int24 avaragePoolTick
+    int24 poolTick
   ) internal view returns (uint256 token0Amount, uint256 token1Amount) {
     token0Amount = PositionPower.token0Amount(
       liquidity,
-      avaragePoolTick,
+      poolTick,
       tickLower,
       tickUpper
     );
     token1Amount = PositionPower.token1Amount(
       liquidity,
-      avaragePoolTick,
+      poolTick,
       tickLower,
       tickUpper
     );
