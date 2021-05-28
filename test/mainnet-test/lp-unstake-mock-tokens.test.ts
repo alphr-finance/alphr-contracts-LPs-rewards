@@ -109,7 +109,6 @@ describe('Reward :: test unstake method for mock tokens', () => {
       );
       txr = await tx.wait();
       _id[i] = txr.events[5].args.tokenId.toString();
-      console.log(_id[i]);
     }
   });
   before('stake minted tokens', async () => {

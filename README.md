@@ -58,6 +58,9 @@ use ganache for subscriptions via web socket
 
 > yarn hardhat lps-rewards:bootstrap:local  --network localhost
 
+OR with ganache flag
+
+>  yarn hardhat lps-rewards:bootstrap:local  --network localhost --ganache true
 
 NOTE: import this address to wallet provider
 
