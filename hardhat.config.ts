@@ -2,6 +2,7 @@ import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
 import '@typechain/hardhat';
 import 'hardhat-gas-reporter';
+import 'hardhat-abi-exporter';
 import { HardhatUserConfig } from 'hardhat/types';
 require('hardhat-tracer');
 require('@openzeppelin/hardhat-upgrades');
@@ -41,6 +42,12 @@ const config: HardhatUserConfig = {
     enabled: process.env.REPORT_GAS == 'false' ? false : true,
     currency: 'USD',
     coinmarketcap: coinmarketcapAPIKey,
+  },
+  abiExporter: {
+    path: './abi',
+    clear: true,
+    flat: true,
+    spacing: 2,
   },
 };
 export default config;

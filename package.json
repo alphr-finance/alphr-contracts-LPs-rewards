@@ -23,6 +23,7 @@
   "devDependencies": {
     "@commitlint/cli": "^12.0.1",
     "@commitlint/config-conventional": "^12.0.1",
+    "@nomiclabs/buidler": "^1.4.8",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/contracts-upgradeable": "3.4.0",
@@ -48,6 +49,7 @@
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.1.4",
     "hardhat": "^2.2.1",
+    "hardhat-abi-exporter": "^2.2.1",
     "hardhat-log-remover": "^2.0.1",
     "hardhat-tracer": "^1.0.0-alpha.6",
     "husky": "4",
@@ -59,8 +61,7 @@
     "solhint-plugin-prettier": "^0.0.5",
     "ts-node": "^9.1.1",
     "typechain": "^5.0.0",
-    "typescript": "^4.2.4",
-    "@nomiclabs/buidler": "^1.4.8"
+    "typescript": "^4.2.4"
   },
   "husky": {
     "hooks": {
