@@ -19,12 +19,10 @@ import { getMinTick, getMaxTick } from '../../shared/ticks';
 import { encodePriceSqrt } from '../../shared/encodePriceSqrt';
 import { IERC20 } from '../../typechain';
 import { BigNumber } from 'ethers';
-import { sortedTokens } from '../../shared/tokenSort';
-import { computePoolAddress } from '../../shared/computePoolAddress';
 
 describe('Reward :: test reward contract', () => {
   let deployer, user: SignerWithAddress;
-  let rew: Rewards;
+  let rewards: Rewards;
   let tx: ContractTransaction;
   let txr: ContractReceipt;
   let nonFungibleManager: INonfungiblePositionManager;
@@ -32,18 +30,27 @@ describe('Reward :: test reward contract', () => {
   let _id: BigNumber;
   before('init signers', async () => {
     [deployer, user] = await ethers.getSigners();
-    console.log({ deployer });
   });
 
-  before('deploy rewards contract', async () => {
-    const Rewards = await ethers.getContractFactory('Rewards');
-    rew = await upgrades.deployProxy(Rewards, [
-      UNISWAP_V3_FACTORY,
-      UNISWAP_V3_NFT_POSITION_MANAGER,
-      ALPHR_TOKEN,
-      ALPHR_UNISWAP_V3_POOL,
-    ]);
-  });
+  before(
+    'deploy LPs rewards contract',
+    async () =>
+      (rewards = await ethers
+        .getContractFactory('Rewards')
+        .then((rewardsContractFactory) =>
+          rewardsContractFactory.connect(deployer)
+        )
+        .then((rewardsContractFactory) =>
+          upgrades.deployProxy(rewardsContractFactory, [
+            UNISWAP_V3_FACTORY,
+            UNISWAP_V3_NFT_POSITION_MANAGER,
+            ALPHR_TOKEN,
+            ALPHR_UNISWAP_V3_POOL,
+          ])
+        )
+        .then((rewardsContract) => rewardsContract.deployed())
+        .then((rewardsDeployedContract) => rewardsDeployedContract as Rewards))
+  );
 
   before('create nft manager', async () => {
     nonFungibleManager = (await ethers.getContractAt(
@@ -51,21 +58,14 @@ describe('Reward :: test reward contract', () => {
       UNISWAP_V3_NFT_POSITION_MANAGER
     )) as INonfungiblePositionManager;
 
-    const [token0, token1] = sortedTokens(WETH9, ALPHR_TOKEN);
-    const expectedAddress = computePoolAddress(
-      UNISWAP_V3_FACTORY,
-      [token0, token1],
-      FeeAmount.MEDIUM
-    );
-    console.log(expectedAddress);
-    await (
-      await nonFungibleManager.createAndInitializePoolIfNecessary(
+    await nonFungibleManager
+      .createAndInitializePoolIfNecessary(
         ALPHR_TOKEN,
         WETH9,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
       )
-    ).wait();
+      .then((tx) => tx.wait());
   });
 
   before('get alphr token', async () => {
@@ -146,27 +146,27 @@ describe('Reward :: test reward contract', () => {
   });
 
   it('revert stake when token is not approved', async () => {
-    await expect(rew.connect(user).stake(_id)).to.be.revertedWith(
+    await expect(rewards.connect(user).stake(_id)).to.be.revertedWith(
       'Token should be approved before stake'
     );
   });
 
   it('emit stake event', async () => {
-    await nonFungibleManager.connect(user).approve(rew.address, _id);
-    let txLocal = await rew.connect(user).stake(_id);
+    await nonFungibleManager.connect(user).approve(rewards.address, _id);
+    let txLocal = await rewards.connect(user).stake(_id);
     let txrLocal = txLocal.wait();
     const expectedEventName =
-      rew.interface.events['NewStake(uint256,address)'].name;
+      rewards.interface.events['NewStake(uint256,address)'].name;
     const actualEventName = (await txrLocal).events[2].event;
     expect(actualEventName).to.be.equal(expectedEventName);
   });
 
   it('rewards conatract is now owned the token id', async () => {
-    expect(await nonFungibleManager.ownerOf(_id)).to.be.eq(rew.address);
+    expect(await nonFungibleManager.ownerOf(_id)).to.be.eq(rewards.address);
   });
 
   it('reward is stored user tokenId', async () => {
-    let actualTokens = await rew.connect(user).staked();
+    let actualTokens = await rewards.connect(user).staked();
     expect(actualTokens.length).to.be.eq(1);
     expect(actualTokens.toString()).to.be.eq(_id);
   });
