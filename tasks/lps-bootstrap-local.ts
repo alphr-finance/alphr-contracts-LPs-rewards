@@ -1,6 +1,6 @@
 import { LP_TEST_BOOTSTRAP } from './lps-bootstrap-local.names';
 import { LP_DEPLOY } from './rewards/lp-rewards-deploy.names';
-import { task } from 'hardhat/config';
+import { task, types } from 'hardhat/config';
 import { utils } from 'ethers';
 
 import {
@@ -13,8 +13,14 @@ import { FeeAmount } from '../shared/constants';
 import { encodePriceSqrt } from '../shared/encodePriceSqrt';
 import { computePoolAddress } from '../shared/computePoolAddress';
 
-export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
-  async (_, hre) => {
+export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC)
+  .addOptionalParam(
+    LP_TEST_BOOTSTRAP.GANACHE,
+    LP_TEST_BOOTSTRAP.GANACHE_DESC,
+    false,
+    types.boolean
+  )
+  .setAction(async ({ ganache }, hre) => {
     const [user, dev] = await hre.ethers.getSigners();
     const mockAlphrAddress = await hre.run('erc20mock:deploy', {
       name: 'MockALPHR',
@@ -145,6 +151,8 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC).setAction(
       await rewards.connect(dev).stake(position);
       console.log('Staked token: %s', position);
     }
-    await hre.network.provider.send('evm_setIntervalMining', [5000]);
-  }
-);
+
+    if (!ganache) {
+      await hre.network.provider.send('evm_setIntervalMining', [5000]);
+    }
+  });

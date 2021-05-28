@@ -44,12 +44,17 @@ Deployed LPs rewards contract:
 
 ### Local bootstrap
 
-start node
+#### start node
 
 > yarn hardhat node
 
+use ganache for subscriptions via web socket
 
-run dev bootstrap
+> ganache-cli -d --fork https://node.endpoint@12472213
+
+
+
+####run dev bootstrap
 
 > yarn hardhat lps-rewards:bootstrap:local  --network localhost
 
