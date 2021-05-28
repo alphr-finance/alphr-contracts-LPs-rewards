@@ -45,7 +45,8 @@ contract Rewards is IRewards, OwnableUpgradeable {
   address private alphrToken;
   address private alphrPool;
 
-  uint256 private blockReward;
+  uint256 private blockALPHRReward;
+  uint256 private blockETHReward;
 
   EnumerableSet.UintSet private positions;
   mapping(address => EnumerableSet.UintSet) usersPositions;
@@ -60,7 +61,8 @@ contract Rewards is IRewards, OwnableUpgradeable {
     nftManager = _nftManager;
     alphrToken = _alphrToken;
     alphrPool = _alphrPool;
-    blockReward = 0;
+    blockALPHRReward = 0;
+    blockETHReward = 0;
     __Ownable_init();
   }
 
@@ -86,12 +88,20 @@ contract Rewards is IRewards, OwnableUpgradeable {
     return nftManager;
   }
 
-  function setBlockReward(uint256 _blockReward) external onlyOwner {
-    blockReward = _blockReward;
+  function setBlockALPHRReward(uint256 _blockReward) external onlyOwner {
+    blockALPHRReward = _blockReward;
   }
 
-  function getBlockReward() external view returns (uint256) {
-    return blockReward;
+  function getBlockALPHRReward() external view returns (uint256) {
+    return blockALPHRReward;
+  }
+
+  function setBlockETHReward(uint256 _blockReward) external onlyOwner {
+    blockETHReward = _blockReward;
+  }
+
+  function getBlockETHReward() external view returns (uint256) {
+    return blockETHReward;
   }
 
   function stake(uint256 _id) external override {
@@ -172,6 +182,24 @@ contract Rewards is IRewards, OwnableUpgradeable {
     PoolAddress.PoolKey memory poolKey =
       PoolAddress.PoolKey({token0: _tokenA, token1: _tokenB, fee: _fee});
     return PoolAddress.computeAddress(factory, poolKey);
+  }
+
+  function calculatePositionPower(
+    uint128 liquidity,
+    int24 tickLower,
+    int24 tickUpper,
+    int24 poolTick
+  ) external view returns (uint256) {
+    address wethToken = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    return
+      PositionPower.calculatePositionPower(
+        alphrToken,
+        wethToken,
+        liquidity,
+        tickLower,
+        tickUpper,
+        poolTick
+      );
   }
 
   function batchERC20Transfer(
