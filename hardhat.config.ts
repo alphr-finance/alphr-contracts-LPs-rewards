@@ -7,7 +7,6 @@ import { HardhatUserConfig } from 'hardhat/types';
 require('hardhat-tracer');
 require('@openzeppelin/hardhat-upgrades');
 
-const coinmarketcapAPIKey = '53cec9bc-a843-4e72-ab3b-8bf3df2fa87e';
 require('./tasks/index');
 const config: HardhatUserConfig = {
   networks: {
@@ -41,8 +40,6 @@ const config: HardhatUserConfig = {
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS == 'false' ? false : true,
-    currency: 'USD',
-    coinmarketcap: coinmarketcapAPIKey,
   },
   abiExporter: {
     path: './abi',
