@@ -100,7 +100,21 @@ export default task(LP_TEST_BOOTSTRAP.NAME, LP_TEST_BOOTSTRAP.DESC)
       alphr: mockAlphrAddress,
       pool: poolAddress,
     });
+
+    // set block reward to 1
+    const rew = await hre.ethers.getContractAt('Rewards', rewardsAddress);
+    await rew.connect(user).setBlockALPHRReward(utils.parseUnits('1', 18));
+    await rew.connect(user).setBlockETHReward(utils.parseUnits('1', 18));
+
     console.log('Deployed LPs rewards contract: %s', rewardsAddress);
+    console.log(
+      'ALPHR rewards amount per block:\t%s',
+      utils.formatUnits(await rew.connect(user).getBlockALPHRReward(), 18)
+    );
+    console.log(
+      'ETH rewards amount per block:\t%s',
+      utils.formatUnits(await rew.connect(user).getBlockETHReward(), 18)
+    );
 
     await mockAlphr
       .allowance(user.address, UNISWAP_V3_NFT_POSITION_MANAGER)
