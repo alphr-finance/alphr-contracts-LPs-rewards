@@ -6,6 +6,7 @@ import 'hardhat-abi-exporter';
 import { HardhatUserConfig } from 'hardhat/types';
 require('hardhat-tracer');
 require('@openzeppelin/hardhat-upgrades');
+require('dotenv').config();
 
 require('./tasks/index');
 const config: HardhatUserConfig = {
@@ -18,9 +19,9 @@ const config: HardhatUserConfig = {
       },
     },
     rinkeby: {
-      url: '',
+      url: process.env.RINKEBY_URL,
       accounts: {
-        mnemonic: '',
+        mnemonic: process.env.MNEMONIC_PHRASE,
       },
     },
   },

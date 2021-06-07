@@ -13,3 +13,5 @@ abi
 .idea
 
 .openzeppelin
+
+.env
