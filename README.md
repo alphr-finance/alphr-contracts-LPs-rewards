@@ -1,6 +1,6 @@
 # ALPHR smart contracts
 
-install dependencies 
+install dependencies
 
     yarn
 
@@ -21,20 +21,22 @@ To disable gas report when running tests, use:
     env REPORT_GAS=false yarn hardhat test
 
 ## DEV ENV
+
 ### Rinkeby
+
 set rinkeby URL and your mnemonic in hh config first;
 
 Deployed Mock ALPHR tokens:
 
     0xfF59E7f7bC71c50DaF970B140df356359acA5Dcc
 
-Deployed Mock WETH tokens: 
+Deployed Mock WETH tokens:
 
     0xaD94edE5fAaac6f75E6D9Aa286a3FC1AA8aF38fb
-Deployed LPs rewards contract: 
+
+Deployed LPs rewards contract:
 
     0x4Ea4e80dba5E21591e11B5c774b9e80D53b9C84B
-
 
 ### mint ERC 20
 
@@ -52,17 +54,49 @@ use ganache for subscriptions via web socket
 
 > ganache-cli -d --fork https://node.endpoint@12472213
 
-
-
 ####run dev bootstrap
 
-> yarn hardhat lps-rewards:bootstrap:local  --network localhost
+> yarn hardhat lps-rewards:bootstrap:local --network localhost
 
 OR with ganache flag
 
->  yarn hardhat lps-rewards:bootstrap:local  --network localhost --ganache true
+> yarn hardhat lps-rewards:bootstrap:local --network localhost --ganache true
 
 NOTE: import this address to wallet provider
 
     Account #1: 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
     Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+
+## Proxy Upgradability
+
+We are using openzeppelin transparent upgradable proxy to upgrade the `Rewards` contract.
+
+### Deployment process
+
+The `scripts/deploy.ts` is used for the initial deployment.
+
+1. Check if the `Rewards` contract is upgrade-safe.
+2. Set up a proxy admin(ProxyAdmin contract) if needed.
+3. Deploy an implementation contract for `Rewards` unless there is one already from the prev deployment.
+4. Create a proxy and initialize by calling `initialize` function.
+
+The `scripts/upgrade.ts` is used for the upgrades.
+
+1. We use the `upgradeProxy` function to upgrade the deployed instance to a new version. The new version can be a different contract or you can just modify the existing `Rewards` contract and recompile it - the plugin will note it changed.
+
+2. While this plugin keeps track of all the implementation contracts you have deployed per network, in order to reuse them and validate storage compatibilities, it does not keep track of the proxies you have deployed. This means that you will need to manually keep track of each deployment address, to supply those to the upgrade function when needed. You can find the addresses of the proxies and proxy admin inside `.openzeppelin` folder.
+   For example, if you've deployed to the rinkeby network, you can see `rinkeby.json` file under `.openzeppelin` folder.
+
+3. The plugin will take care of comparing new implementation contract to the previous one to ensure they are compatible for the upgrade, deploy the new implementation contract (unless there is one already from a previous deployment), and upgrade the existing proxy to the new implementation.
+
+### Permissions
+
+1. Proxy
+   `TransparentUpgradableProxy` has ability to upgrade the implementation contract. We can use `upgradeTo` function defined in the Proxy contract. But this function can be only called from the admin of the proxy.
+2. PAC(Proxy Admin Contract)
+   By default, PAC is the admin of each proxies deployed to the network. There is only one proxy admin for each network.
+   Only the admin of the proxy can upgrade the proxy. Which means PAC can only upgrade the `Rewards` contract unless we manually change the admin of proxy using `changeProxyAdmin` function defined in PAC
+3. PAC owner
+   To call the funtions defined in PAC, we need ownership. The owner is the account we used for the deployment. This means, ultimately, the deployer has the only access to upgrade the `Rewards` contract.
+   To use multisig account, we need to `transferOwnership` from the deployer to the multisig account after deployment. Then only multisig account has access to upgrade.
+   When we need to upgrade the `Rewards` contract, we need to transfer ownership back to the deployer and then upgrade. After successful deployment, we should use `transferOwnership` function to change the owner back to multisig.
