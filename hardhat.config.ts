@@ -8,6 +8,9 @@ require('hardhat-tracer');
 require('@openzeppelin/hardhat-upgrades');
 
 require('./tasks/index');
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 const config: HardhatUserConfig = {
   networks: {
     hardhat: {
@@ -22,6 +25,10 @@ const config: HardhatUserConfig = {
       accounts: {
         mnemonic: '',
       },
+    },
+    kovan: {
+      url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      accounts: [process.env.PRIVATE_KEY],
     },
   },
   solidity: {
