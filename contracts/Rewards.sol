@@ -113,6 +113,11 @@ contract Rewards is IRewards, OwnableUpgradeable {
       INonfungiblePositionManager(nftManager).getApproved(_id) == address(this),
       'Token should be approved before stake'
     );
+    (, , , , , , , uint128 liquidity, , , , ) = INonfungiblePositionManager(nftManager).positions(_id);
+    require(
+      liquidity > 0,
+      'Position must provide liquidity'
+    );
     INonfungiblePositionManager(nftManager).transferFrom(
       msg.sender,
       address(this),
